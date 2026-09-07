@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>☠ Gilded Kraken — NFC Sticker Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0d1b2a;--navy-mid:#1a2e45;--navy-light:#243b55;
+  --parchment:#f4e9d0;--parchment-dark:#e8d5a3;
+  --gold:#c9922a;--gold-light:#e8b84b;--gold-bright:#ffd76a;--amber:#d4822a;
+  --sea:#2a6b5e;--sea-light:#3d9a89;--rust:#8b3a1e;--white:#fdf8ef;
+  --font-d:'Cinzel','Palatino Linotype',Georgia,serif;
+  --font-b:'Crimson Text',Georgia,'Times New Roman',serif;
+  --ease-out-quart:cubic-bezier(0.165,0.84,0.44,1);
+  --ease-in-out:cubic-bezier(0.645,0.045,0.355,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+body{background:var(--navy);color:var(--parchment);font-family:var(--font-b);min-height:100vh;padding-bottom:2rem}
+
+.page-header{background:linear-gradient(90deg,var(--navy),var(--navy-mid));border-bottom:2px solid rgba(201,146,42,.3);padding:.7rem .9rem;display:flex;align-items:center;justify-content:space-between}
+.page-title{font-family:var(--font-d);font-size:.82rem;font-weight:900;color:var(--gold-light);letter-spacing:.07em}
+.page-badge{font-family:var(--font-d);font-size:.5rem;font-weight:700;background:rgba(42,107,94,.25);border:1px solid rgba(61,154,137,.4);border-radius:4px;padding:.1rem .4rem;color:#7dd8cc;letter-spacing:.06em}
+
+.intro-band{background:rgba(201,146,42,.07);border-bottom:1px solid rgba(201,146,42,.15);padding:.65rem .9rem}
+.intro-text{font-family:var(--font-b);font-style:italic;font-size:.8rem;color:var(--parchment-dark);line-height:1.5;opacity:.8}
+.intro-text strong{font-style:normal;color:var(--gold-light);font-weight:600}
+.capacity-bar{display:flex;align-items:center;gap:.5rem;margin-top:.45rem}
+.cap-label{font-family:var(--font-d);font-size:.52rem;font-weight:700;letter-spacing:.06em;color:var(--parchment-dark);opacity:.5;white-space:nowrap}
+.cap-pill{font-family:var(--font-d);font-size:.52rem;font-weight:700;letter-spacing:.05em;border-radius:4px;padding:.1rem .4rem}
+.cap-pill.ok{background:rgba(42,107,94,.25);border:1px solid rgba(61,154,137,.4);color:#7dd8cc}
+
+/* URL config card */
+.url-card{margin:.8rem .75rem 0;background:var(--navy-mid);border:2px solid rgba(201,146,42,.35);border-radius:12px;overflow:hidden}
+.url-card-head{background:linear-gradient(90deg,rgba(201,146,42,.15),transparent);padding:.5rem .75rem;display:flex;align-items:center;gap:.5rem}
+.url-card-icon{font-size:1.1rem}
+.url-card-title{font-family:var(--font-d);font-size:.68rem;font-weight:700;color:var(--gold-bright);letter-spacing:.04em}
+.url-card-body{padding:.55rem .75rem;display:flex;flex-direction:column;gap:.45rem}
+.url-hint{font-family:var(--font-b);font-size:.75rem;color:var(--parchment-dark);line-height:1.45;opacity:.75}
+.url-hint strong{color:var(--gold-light);font-style:normal;font-weight:600}
+.url-input-row{display:flex;gap:.4rem}
+.url-input{flex:1;background:rgba(0,0,0,.35);border:1px solid rgba(201,146,42,.3);border-radius:7px;padding:.38rem .5rem;font-family:'Courier New',monospace;font-size:.62rem;color:var(--gold-bright);outline:none;-webkit-tap-highlight-color:transparent}
+.url-input:focus{border-color:var(--gold)}
+.url-save-btn{padding:.38rem .6rem;border:none;border-radius:7px;background:linear-gradient(135deg,var(--gold),var(--amber));font-family:var(--font-d);font-size:.58rem;font-weight:700;color:var(--navy);cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:opacity 120ms ease,transform 120ms ease}
+.url-save-btn:active{opacity:.82;transform:scale(.97)}
+.url-status{font-family:var(--font-d);font-size:.52rem;font-weight:700;letter-spacing:.05em;color:#7dd8cc;opacity:0;transition:opacity 200ms ease}
+.url-status.show{opacity:1}
+.byte-preview{font-family:var(--font-d);font-size:.5rem;color:var(--parchment-dark);opacity:.45}
+
+/* Sticker cards */
+.stickers-list{padding:.8rem .75rem;display:flex;flex-direction:column;gap:.75rem}
+.sticker-card{background:var(--navy-mid);border:1px solid rgba(201,146,42,.22);border-radius:12px;overflow:hidden;transition:border-color 180ms ease}
+.sticker-card.written{border-color:rgba(61,154,137,.5)}
+.sticker-card.type-url{border-color:rgba(201,146,42,.45)}
+.sticker-head{background:linear-gradient(90deg,var(--navy),var(--navy-mid));padding:.5rem .75rem;display:flex;align-items:center;gap:.5rem}
+.sticker-num{width:26px;height:26px;border-radius:50%;background:rgba(201,146,42,.18);border:1px solid rgba(201,146,42,.4);font-family:var(--font-d);font-size:.7rem;font-weight:900;color:var(--gold-bright);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sticker-card.written .sticker-num{background:rgba(42,107,94,.3);border-color:rgba(61,154,137,.5);color:#7dd8cc}
+.sticker-card.type-url .sticker-num{background:rgba(201,146,42,.25);border-color:var(--gold)}
+.sticker-name{font-family:var(--font-d);font-size:.72rem;font-weight:700;color:var(--gold-light);flex:1}
+.sticker-rarity{font-family:var(--font-d);font-size:.48rem;font-weight:700;border-radius:3px;padding:.06rem .3rem;letter-spacing:.05em}
+.sticker-rarity.rare{background:rgba(147,197,253,.15);color:#93c5fd;border:1px solid rgba(147,197,253,.25)}
+.sticker-rarity.uncommon{background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.22)}
+.sticker-rarity.common{background:rgba(156,163,175,.15);color:#9ca3af;border:1px solid rgba(156,163,175,.25)}
+.sticker-rarity.special{background:rgba(201,146,42,.2);color:var(--gold-bright);border:1px solid rgba(201,146,42,.4)}
+
+.sticker-body{padding:.6rem .75rem;display:flex;flex-direction:column;gap:.5rem}
+.prop-context{display:flex;align-items:center;gap:.4rem;padding:.32rem .5rem;background:rgba(0,0,0,.2);border-radius:7px;border-left:2px solid rgba(201,146,42,.35)}
+.prop-icon{font-size:1rem;flex-shrink:0}
+.prop-text{font-family:var(--font-b);font-size:.74rem;color:var(--parchment-dark);line-height:1.3}
+.prop-text em{color:var(--gold-light);font-style:normal;font-weight:600}
+
+.char-row{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.char-label{font-family:var(--font-d);font-size:.52rem;font-weight:700;letter-spacing:.06em;color:var(--parchment-dark);opacity:.5;white-space:nowrap}
+.char-btn{padding:.22rem .45rem;border-radius:5px;border:1px solid rgba(201,146,42,.3);background:rgba(255,255,255,.05);font-family:var(--font-d);font-size:.55rem;font-weight:700;color:var(--parchment-dark);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:background 120ms ease,border-color 120ms ease,color 120ms ease}
+.char-btn:active{transform:scale(.95)}
+.char-btn.selected{background:rgba(201,146,42,.22);border-color:var(--gold);color:var(--gold-bright)}
+
+.size-row{display:flex;align-items:center;gap:.5rem}
+.size-bar-wrap{flex:1;height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
+.size-bar-fill{height:100%;border-radius:3px;transition:width 200ms var(--ease-in-out),background 200ms ease}
+.size-label{font-family:var(--font-d);font-size:.5rem;font-weight:700;color:var(--parchment-dark);opacity:.55;white-space:nowrap}
+
+.code-area{background:rgba(0,0,0,.35);border:1px solid rgba(201,146,42,.18);border-radius:8px;padding:.45rem .55rem}
+.code-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.28rem}
+.code-label{font-family:var(--font-d);font-size:.48rem;font-weight:700;letter-spacing:.09em;color:var(--parchment-dark);opacity:.4}
+.code-bytes{font-family:var(--font-d);font-size:.48rem;font-weight:700;color:var(--parchment-dark);opacity:.4}
+.code-text{font-family:'Courier New',monospace;font-size:.6rem;color:var(--gold-bright);word-break:break-all;line-height:1.4;cursor:pointer;user-select:all}
+.code-text.url-code{color:#7dd8cc}
+.code-text:empty::before{content:'← set GitHub URL above first';font-family:var(--font-b);font-style:italic;color:var(--parchment-dark);opacity:.35;font-size:.7rem}
+.no-char-hint::before{content:'← select a character above';font-family:var(--font-b);font-style:italic;color:var(--parchment-dark);opacity:.35;font-size:.7rem}
+
+.action-row{display:flex;gap:.4rem}
+.copy-btn{flex:1;padding:.4rem .5rem;border:none;border-radius:7px;font-family:var(--font-d);font-size:.62rem;font-weight:700;letter-spacing:.05em;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;background:linear-gradient(135deg,var(--gold),var(--amber));color:var(--navy);transition:opacity 120ms ease,transform 120ms ease}
+.copy-btn:active{opacity:.82;transform:scale(.97)}
+.copy-btn:disabled{opacity:.3;pointer-events:none}
+.copy-btn.url-btn{background:linear-gradient(135deg,var(--sea-light),var(--sea))}
+.done-btn{padding:.4rem .6rem;border-radius:7px;border:1px solid rgba(61,154,137,.35);background:rgba(42,107,94,.15);font-family:var(--font-d);font-size:.62rem;font-weight:700;color:#7dd8cc;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:background 150ms ease,border-color 150ms ease}
+.done-btn.marked{background:rgba(42,107,94,.4);border-color:var(--sea-light)}
+.written-banner{text-align:center;font-family:var(--font-d);font-size:.55rem;font-weight:700;letter-spacing:.1em;color:#7dd8cc;padding:.28rem;background:rgba(42,107,94,.15);border-top:1px solid rgba(61,154,137,.2)}
+
+/* iOS tip */
+.ios-tip{margin:.35rem 0 0;background:rgba(147,197,253,.08);border:1px solid rgba(147,197,253,.2);border-radius:7px;padding:.35rem .5rem;font-family:var(--font-b);font-size:.72rem;color:#93c5fd;line-height:1.4}
+.ios-tip strong{font-weight:600}
+
+/* Guide */
+.nfc-guide{margin:.8rem .75rem 0;background:rgba(0,0,0,.2);border:1px solid rgba(201,146,42,.15);border-radius:10px;overflow:hidden}
+.guide-head{padding:.45rem .65rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.guide-head-label{font-family:var(--font-d);font-size:.6rem;font-weight:700;letter-spacing:.08em;color:var(--gold-light);opacity:.75}
+.guide-chv{font-style:normal;font-size:.7rem;color:var(--parchment-dark);opacity:.5;transition:transform 200ms var(--ease-in-out)}
+.guide-chv.open{transform:rotate(180deg)}
+.guide-body{padding:0 .65rem .65rem;display:none}
+.guide-body.open{display:block}
+.guide-step{display:flex;gap:.5rem;align-items:flex-start;padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.guide-step:last-child{border-bottom:none}
+.gs-num{font-family:var(--font-d);font-size:.7rem;font-weight:900;color:var(--gold-bright);flex-shrink:0;width:18px}
+.gs-text{font-family:var(--font-b);font-size:.78rem;color:var(--parchment-dark);line-height:1.45}
+.gs-text strong{color:var(--gold-light);font-weight:600}
+.gs-text code{font-family:'Courier New',monospace;font-size:.7rem;background:rgba(0,0,0,.3);border-radius:3px;padding:.05rem .25rem;color:var(--gold-bright)}
+
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:999;pointer-events:none}
+.toast-msg{background:var(--navy-mid);border:1px solid rgba(201,146,42,.5);border-radius:10px;padding:.4rem .85rem;font-family:var(--font-d);font-size:.68rem;font-weight:700;letter-spacing:.05em;color:var(--gold-light);box-shadow:0 4px 16px rgba(0,0,0,.5);white-space:nowrap;animation:tin .18s var(--ease-out-quart),tout .28s ease 1.8s forwards}
+@keyframes tin{from{opacity:0;transform:translateY(6px) translateX(-50%)}to{opacity:1;transform:translateY(0) translateX(-50%)}}
+@keyframes tout{to{opacity:0;transform:translateY(-4px) translateX(-50%)}}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-title">☠ NFC Sticker Prep v2</div>
+  <div class="page-badge">GM Only · Pre-session</div>
+</div>
+
+<div class="intro-band">
+  <div class="intro-text">Generate <strong>GK: loot codes</strong> and the <strong>app launcher URL</strong> for each sticker. All 5 stickers fit on <strong>NTAG215</strong>.</div>
+  <div class="capacity-bar">
+    <span class="cap-label">Tag capacity:</span>
+    <span class="cap-pill ok">All stickers fit NTAG215 ✓</span>
+  </div>
+</div>
+
+<!-- GitHub URL Config -->
+<div class="url-card">
+  <div class="url-card-head">
+    <div class="url-card-icon">🌐</div>
+    <div class="url-card-title">App Launcher URL — GitHub Pages</div>
+  </div>
+  <div class="url-card-body">
+    <div class="url-hint">Enter your GitHub Pages URL after uploading the player file. The app launcher sticker stores this URL — players tap and the app opens. <strong>Set this once, it saves automatically.</strong></div>
+    <div class="url-input-row">
+      <input class="url-input" id="url-input" type="url" placeholder="https://your-username.github.io/gilded-kraken/gilded_kraken_player_v4.html" autocomplete="off" autocapitalize="off" spellcheck="false"/>
+      <button class="url-save-btn" onclick="saveUrl()">Save URL</button>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div class="byte-preview" id="url-byte-preview"></div>
+      <div class="url-status" id="url-status">✓ Saved</div>
+    </div>
+    <div class="ios-tip"><strong>iPhone users:</strong> After tapping the sticker and opening the app, tap Share → Add to Home Screen for reliable offline access.</div>
+  </div>
+</div>
+
+<div class="stickers-list" id="stickers-list"></div>
+
+<div class="nfc-guide">
+  <div class="guide-head" onclick="toggleGuide()">
+    <span class="guide-head-label">📱 How to write NFC stickers</span>
+    <span class="guide-chv" id="guide-chv">▾</span>
+  </div>
+  <div class="guide-body" id="guide-body">
+    <div class="guide-step"><div class="gs-num">1</div><div class="gs-text">Install <strong>NFC Tools</strong> (free, iOS & Android).</div></div>
+    <div class="guide-step"><div class="gs-num">2</div><div class="gs-text"><strong>Loot stickers:</strong> Write → Add record → <strong>Text</strong> → paste the <code>GK:…</code> code. Hold to sticker until confirmed.</div></div>
+    <div class="guide-step"><div class="gs-num">3</div><div class="gs-text"><strong>App launcher sticker:</strong> Write → Add record → <strong>URL</strong> → paste your GitHub Pages URL. Hold to sticker. When players tap it, the browser opens the app directly.</div></div>
+    <div class="guide-step"><div class="gs-num">4</div><div class="gs-text">Test each sticker after writing — tap with phone to confirm. Loot stickers show GK: text. App sticker opens the browser.</div></div>
+    <div class="guide-step"><div class="gs-num">5</div><div class="gs-text"><strong>iPhone offline setup:</strong> Players open the app URL once at home (with wifi), then tap Share → Add to Home Screen. Works offline on the boat.</div></div>
+    <div class="guide-step"><div class="gs-num">6</div><div class="gs-text">Label sticker backs in pencil. All stickers fit NTAG215 — no need to buy NTAG216.</div></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+const CHARS=[
+  {idx:0,emoji:'🎩',name:'Marin'},
+  {idx:1,emoji:'🔱',name:'Vuk'},
+  {idx:2,emoji:'🔪',name:'Pero'},
+  {idx:3,emoji:'🎵',name:'Zvonko'},
+  {idx:4,emoji:'🎣',name:'Bogdan'},
+  {idx:5,emoji:'⚔️',name:'Mirnes'},
+];
+
+const LOOT_STICKERS=[
+  {
+    id:'boots',num:2,
+    name:'Boots of Confident Incompetence',rarity:'Rare',
+    prop:'Room 2 chest — place sticker on the chest prop before the session.',propIcon:'🥾',
+    item:{id:'boots',n:'Boots of Confident Incompetence',t:'Wondrous',r:'Rare',
+      d:'ADV Persuasion (bad plans). DisAdv Insight. Cannot tell when a plan is bad.',
+      fx:'ADV Persuasion (bad plans) · DisAdv Insight · Cannot remove without Remove Curse',
+      se:{advantage:['persuasion'],disadvantage:['insight']}},
+  },
+  {
+    id:'compass',num:3,
+    name:'Compass of Questionable Directions',rarity:'Uncommon',
+    prop:'Room 3 — Water Weird negotiation reward. Hand to player with the compass prop.',propIcon:'🧭',
+    item:{id:'compass',n:'Compass of Questionable Directions',t:'Wondrous',r:'Uncommon',
+      d:'Points to most interesting thing 1mi. Yes/no oracle, 75% accurate.',
+      fx:'Points to most interesting thing 1mi · Yes/No oracle 75% accurate',se:{}},
+  },
+  {
+    id:'rum1',num:4,
+    name:'Rum of the Depths',rarity:'Uncommon',
+    prop:'Shrine (Encounter B) — attach to a small prop flask or bottle.',propIcon:'🍶',
+    item:{id:'rum1',n:'Rum of the Depths',t:'Potion (Flask)',r:'Uncommon',
+      d:'d6: 1-2: 2d4+2 temp HP. 3-4: Misty Step random dir. 5: Enlarge 1min. 6: Dead pirate possession + pass out.',
+      fx:'d6 random effect',se:{}},
+  },
+  {
+    id:'doubloon',num:5,
+    name:'Lucky Doubloon',rarity:'Common',
+    prop:'Gerald reward (Encounter A) — attach to a coin prop.',propIcon:'🪙',
+    item:{id:'doubloon',n:'Lucky Doubloon',t:'Wondrous',r:'Common',
+      d:'Once per day: reroll any die, use either result. Always warm.',
+      fx:'1/day: reroll any die, keep either result',se:{}},
+  },
+];
+
+const state={
+  app:{written:false},
+};
+LOOT_STICKERS.forEach(s=>{state[s.id]={charIdx:null,written:false};});
+
+// ── URL management ──
+let appUrl = localStorage.getItem('gk_app_url') || '';
+
+function getByteSize(str){return new TextEncoder().encode(str).length;}
+
+function saveUrl(){
+  const val = document.getElementById('url-input').value.trim();
+  if(!val){showToast('Enter a URL first');return;}
+  appUrl = val;
+  localStorage.setItem('gk_app_url', val);
+  const status = document.getElementById('url-status');
+  status.classList.add('show');
+  setTimeout(()=>status.classList.remove('show'), 2000);
+  render();
+  updateBytePreview();
+}
+
+function updateBytePreview(){
+  const val = document.getElementById('url-input')?.value || appUrl;
+  const bytes = getByteSize(val) + 7;
+  const el = document.getElementById('url-byte-preview');
+  if(el && val) el.textContent = bytes + ' bytes / 504B (NTAG215)';
+}
+
+// ── Code generation ──
+function generateLootCode(item,charIdx){
+  const payload={id:item.id,n:item.n,t:item.t,r:item.r,d:item.d,fx:item.fx,se:item.se||{},c:parseInt(charIdx)};
+  return 'GK:'+btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+}
+
+// ── Render ──
+function render(){
+  const list = document.getElementById('stickers-list');
+  list.innerHTML = buildAppCard() + LOOT_STICKERS.map(s=>buildLootCard(s)).join('');
+  // Restore URL input
+  const inp = document.getElementById('url-input');
+  if(inp && appUrl) inp.value = appUrl;
+  inp?.addEventListener('input', updateBytePreview);
+  updateBytePreview();
+}
+
+function buildAppCard(){
+  const st = state.app;
+  const hasUrl = !!appUrl;
+  const bytes = hasUrl ? getByteSize(appUrl)+7 : 0;
+  const pct = hasUrl ? Math.round(bytes/504*100) : 0;
+  const barColor = pct>90?'#ef4444':pct>70?'var(--amber)':'#7dd8cc';
+
+  return`<div class="sticker-card type-url${st.written?' written':''}" id="card-app">
+  <div class="sticker-head">
+    <div class="sticker-num">1</div>
+    <div class="sticker-name">Player App Launcher</div>
+    <span class="sticker-rarity special">URL</span>
+  </div>
+  <div class="sticker-body">
+    <div class="prop-context">
+      <div class="prop-icon">📱</div>
+      <div class="prop-text">Stick anywhere visible — table edge, mast, prop box. One tap opens the player app on any phone. Write as a <strong>URL record</strong> in NFC Tools (not Text).</div>
+    </div>
+    ${hasUrl?`<div class="size-row">
+      <div class="size-bar-wrap"><div class="size-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+      <span class="size-label">${bytes}B / 504B (NTAG215)</span>
+    </div>`:''}
+    <div class="code-area">
+      <div class="code-header">
+        <span class="code-label">URL to write — tap to select all</span>
+        ${hasUrl?`<span class="code-bytes">${bytes} bytes</span>`:''}
+      </div>
+      <div class="code-text url-code" id="code-app" onclick="selectCode('app')">${hasUrl?appUrl:'<span class="no-char-hint"></span>'}</div>
+    </div>
+    <div class="action-row">
+      <button class="copy-btn url-btn" id="copy-app" onclick="copyAppUrl()" ${hasUrl?'':'disabled'}>
+        📋 Copy URL for NFC Tools
+      </button>
+      <button class="done-btn${st.written?' marked':''}" onclick="markWritten('app')">
+        ${st.written?'✓ Written':'Mark written'}
+      </button>
+    </div>
+  </div>
+  ${st.written?'<div class="written-banner">✓ STICKER WRITTEN</div>':''}
+</div>`;
+}
+
+function buildLootCard(s){
+  const st = state[s.id];
+  const hasChar = st.charIdx !== null;
+  const code = hasChar ? generateLootCode(s.item, st.charIdx) : '';
+  const bytes = code ? getByteSize(code)+7 : 0;
+  const pct = bytes ? Math.round(bytes/504*100) : 0;
+  const barColor = pct>90?'#ef4444':pct>70?'var(--amber)':'var(--sea-light)';
+  const rarityClass = s.rarity.toLowerCase();
+
+  const charBtns = CHARS.map(c=>`<div class="char-btn${st.charIdx===c.idx?' selected':''}" onclick="selectChar('${s.id}',${c.idx})">${c.emoji} ${c.name}</div>`).join('');
+
+  return`<div class="sticker-card${st.written?' written':''}" id="card-${s.id}">
+  <div class="sticker-head">
+    <div class="sticker-num">${s.num}</div>
+    <div class="sticker-name">${s.name}</div>
+    <span class="sticker-rarity ${rarityClass}">${s.rarity}</span>
+  </div>
+  <div class="sticker-body">
+    <div class="prop-context">
+      <div class="prop-icon">${s.propIcon}</div>
+      <div class="prop-text">${s.prop}</div>
+    </div>
+    <div class="char-row">
+      <span class="char-label">Send to:</span>
+      ${charBtns}
+    </div>
+    ${hasChar?`<div class="size-row">
+      <div class="size-bar-wrap"><div class="size-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+      <span class="size-label">${bytes}B / 504B (NTAG215)</span>
+    </div>`:''}
+    <div class="code-area">
+      <div class="code-header">
+        <span class="code-label">GK Code — tap to select</span>
+        ${hasChar?`<span class="code-bytes">${bytes} bytes</span>`:''}
+      </div>
+      <div class="code-text" id="code-${s.id}" onclick="selectCode('${s.id}')">${code||'<span class="no-char-hint"></span>'}</div>
+    </div>
+    <div class="action-row">
+      <button class="copy-btn" id="copy-${s.id}" onclick="copyLootCode('${s.id}')" ${hasChar?'':'disabled'}>
+        📋 Copy for NFC Tools
+      </button>
+      <button class="done-btn${st.written?' marked':''}" onclick="markWritten('${s.id}')">
+        ${st.written?'✓ Written':'Mark written'}
+      </button>
+    </div>
+  </div>
+  ${st.written?'<div class="written-banner">✓ STICKER WRITTEN</div>':''}
+</div>`;
+}
+
+// ── Interactions ──
+function selectChar(id,charIdx){
+  state[id].charIdx = charIdx;
+  render();
+}
+
+function selectCode(id){
+  const el = document.getElementById('code-'+id);
+  if(!el) return;
+  try{const r=document.createRange();r.selectNodeContents(el);const s=window.getSelection();s.removeAllRanges();s.addRange(r);}catch(e){}
+}
+
+async function copyAppUrl(){
+  if(!appUrl){showToast('Set the GitHub URL first');return;}
+  try{
+    await navigator.clipboard.writeText(appUrl);
+    showToast('📋 URL copied — paste into NFC Tools as URL record');
+  }catch(e){
+    selectCode('app');
+    showToast('📋 Selected — long-press to copy');
+  }
+}
+
+async function copyLootCode(id){
+  const st = state[id];
+  if(st.charIdx===null){showToast('Select a character first');return;}
+  const s = LOOT_STICKERS.find(x=>x.id===id);
+  const code = generateLootCode(s.item, st.charIdx);
+  const charName = CHARS[st.charIdx].name;
+  try{
+    await navigator.clipboard.writeText(code);
+    showToast('📋 Copied for '+charName+' — paste into NFC Tools as Text');
+  }catch(e){
+    selectCode(id);
+    showToast('📋 Selected — long-press to copy');
+  }
+}
+
+function markWritten(id){
+  state[id].written = !state[id].written;
+  render();
+  const total = Object.values(state).filter(s=>s.written).length;
+  const all = Object.keys(state).length;
+  if(state[id].written){
+    showToast(total===all?'🎉 All '+all+' stickers written! Ready.':'✓ Sticker '+total+'/'+all+' written');
+  }
+}
+
+function toggleGuide(){
+  const body = document.getElementById('guide-body');
+  const chv = document.getElementById('guide-chv');
+  const open = body.classList.toggle('open');
+  chv.classList.toggle('open', open);
+}
+
+let toastTimer;
+function showToast(msg){
+  const el = document.getElementById('toast');
+  el.innerHTML = `<div class="toast-msg">${msg}</div>`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.innerHTML='', 2200);
+}
+
+render();
+</script>
+</body>
+</html>

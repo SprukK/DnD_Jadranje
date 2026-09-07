@@ -1,0 +1,24 @@
+{
+  "name": "Gilded Kraken — Player Sheet",
+  "short_name": "Gilded Kraken",
+  "description": "D&D 5e player sheet for The Curse of the Gilded Kraken",
+  "start_url": "./gilded_kraken_player_v4.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d1b2a",
+  "theme_color": "#0d1b2a",
+  "icons": [
+    {
+      "src": "icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
