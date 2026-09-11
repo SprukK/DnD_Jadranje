@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d1b2a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kraken GM">
+<link rel="manifest" href="gm.webmanifest">
+<link rel="apple-touch-icon" href="gm-icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="gm-icon-192.png">
+<title>☠ Gilded Kraken — GM v5</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0d1b2a;--navy-mid:#1a2e45;--navy-light:#243b55;--navy-dark:#080f18;
+  --parchment:#f4e9d0;--parchment-dark:#e8d5a3;
+  --gold:#c9922a;--gold-light:#e8b84b;--gold-bright:#ffd76a;--amber:#d4822a;--rust:#8b3a1e;
+  --sea:#2a6b5e;--sea-light:#3d9a89;--sea-dark:#1d4f47;
+  --text-dark:#1a1208;--white:#fdf8ef;--red:#c0392b;--teal:#0891b2;
+  --spell:#8b5cf6;--warlock:#ec4899;--ki:#a78bfa;
+  --common:#9ca3af;--uncommon:#4ade80;--rare:#93c5fd;--very-rare:#c4b5fd;--legendary:#ffd76a;
+  --font-d:'Cinzel','Palatino Linotype',Georgia,serif;
+  --font-b:'Crimson Text',Georgia,'Times New Roman',serif;
+  --tab-h:58px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+/* ===== ANIMATION TOKENS ===== */
+:root{
+  --ease-out-quart:cubic-bezier(0.165,0.84,0.44,1);
+  --ease-out-cubic:cubic-bezier(0.215,0.61,0.355,1);
+  --ease-in-out-cubic:cubic-bezier(0.645,0.045,0.355,1);
+  --dur-micro:120ms;
+  --dur-ui:200ms;
+  --dur-modal:250ms;
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;
+  }
+}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{background:var(--navy-dark);color:var(--parchment);font-family:var(--font-b);min-height:100vh;overflow:hidden}
+.gm-header{background:linear-gradient(90deg,var(--navy-dark),var(--navy-mid));border-bottom:2px solid rgba(201,146,42,.3);padding:.55rem .8rem;display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:200;height:48px}
+.gm-title{font-family:var(--font-d);font-size:.78rem;font-weight:900;color:var(--gold-light);letter-spacing:.08em}
+.gm-badge{font-family:var(--font-d);font-size:.52rem;font-weight:700;background:rgba(192,57,43,.25);border:1px solid rgba(192,57,43,.5);border-radius:4px;padding:.1rem .4rem;color:#ff8a80;letter-spacing:.05em}
+.tab-content{display:none;position:fixed;top:48px;left:0;right:0;bottom:var(--tab-h);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:.7rem .7rem calc(env(safe-area-inset-bottom) + .5rem)}
+.tab-content.active{display:block;animation:tab-enter var(--dur-ui) var(--ease-out-quart)}
+@keyframes tab-enter{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+body::after{content:'';position:fixed;top:48px;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);z-index:150;pointer-events:none}
+.tab-bar{position:fixed;bottom:0;left:0;right:0;height:calc(var(--tab-h) + env(safe-area-inset-bottom));background:var(--navy-dark);border-top:1px solid rgba(201,146,42,.22);display:grid;grid-template-columns:repeat(5,1fr);z-index:200;padding-bottom:env(safe-area-inset-bottom)}
+.tab-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;color:var(--parchment-dark);opacity:.4;transition:opacity var(--dur-ui) ease,color var(--dur-ui) ease;padding:.3rem 0}
+.tab-btn .ti{font-size:1.25rem;line-height:1;transition:transform var(--dur-micro) ease}
+.tab-btn:active .ti{transform:scale(0.88)}
+.tab-btn .tl{font-family:var(--font-d);font-size:.44rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.tab-btn.active{opacity:1;color:var(--gold-light)}
+.card{background:var(--navy-mid);border:1px solid rgba(201,146,42,.18);border-radius:10px;overflow:hidden;margin-bottom:.6rem}
+.card-head{background:linear-gradient(90deg,var(--navy-dark),var(--navy));color:var(--gold-light);font-family:var(--font-d);font-size:.67rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.42rem .7rem;display:flex;align-items:center;gap:.35rem;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.card-head .chv{margin-left:auto;transition:transform var(--dur-ui) var(--ease-in-out-cubic);font-style:normal;font-size:.7rem}
+.card-head.collapsed .chv{transform:rotate(-90deg)}
+.card-body{padding:.6rem .7rem}
+.card-body.hidden{display:none}
+.divider{height:1px;background:linear-gradient(90deg,transparent,rgba(201,146,42,.2),transparent);margin:.45rem 0}
+
+/* NOTES / SCENE ROWS */
+.scene-list{display:flex;flex-direction:column;gap:.3rem}
+.scene-row{display:flex;align-items:flex-start;gap:.5rem;padding:.4rem .55rem;background:var(--navy);border-radius:8px;border:1px solid rgba(201,146,42,.12);transition:border-color var(--dur-ui) ease,opacity var(--dur-ui) ease}
+.scene-row.done{opacity:.45}
+.scene-row.done .scene-label{text-decoration:line-through}
+.scene-check{width:22px;height:22px;border-radius:50%;border:2px solid rgba(201,146,42,.4);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:.65rem;transition:background var(--dur-ui) var(--ease-out-cubic),border-color var(--dur-ui) var(--ease-out-cubic),transform var(--dur-micro) ease;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;will-change:transform}
+.scene-check:active{transform:scale(0.85)}
+.scene-row.done .scene-check{background:var(--sea);border-color:var(--sea-light);color:var(--white)}
+.scene-info{flex:1;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.scene-label{font-family:var(--font-d);font-size:.68rem;font-weight:700;color:var(--gold-light)}
+.scene-desc{font-family:var(--font-b);font-size:.7rem;color:var(--parchment-dark);opacity:.6;margin-top:.08rem;line-height:1.3}
+.scene-open-hint{font-family:var(--font-d);font-size:.48rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(201,146,42,.4);margin-top:.18rem}
+.act-label{font-family:var(--font-d);font-size:.55rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--parchment-dark);opacity:.4;margin:.5rem 0 .25rem .1rem}
+.notes-textarea{width:100%;min-height:120px;background:rgba(255,255,255,.05);border:1px solid rgba(201,146,42,.2);border-radius:8px;padding:.55rem;font-family:var(--font-b);font-size:.9rem;color:var(--parchment);line-height:1.5;resize:vertical}
+.notes-textarea:focus{outline:none;border-color:var(--gold)}
+.quick-ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.35rem}
+.qr-box{background:var(--navy);border:1px solid rgba(201,146,42,.15);border-radius:7px;padding:.4rem .5rem;text-align:center}
+.qr-diff{font-family:var(--font-d);font-size:.58rem;font-weight:700;color:var(--parchment-dark);opacity:.6;text-transform:uppercase;letter-spacing:.06em}
+.qr-dc{font-family:var(--font-d);font-size:1.3rem;font-weight:900;color:var(--gold-bright);line-height:1}
+.sea-event-btn{width:100%;padding:.55rem;background:linear-gradient(135deg,var(--sea-dark),var(--sea));border:none;border-radius:8px;font-family:var(--font-d);font-size:.72rem;font-weight:700;letter-spacing:.06em;color:var(--white);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.sea-event-result{margin-top:.45rem;background:var(--navy);border:1px solid rgba(61,154,137,.3);border-radius:8px;padding:.45rem .6rem;font-family:var(--font-b);font-style:italic;font-size:.82rem;color:#7dd8cc;line-height:1.4;display:none}
+.sea-event-result.visible{display:block;animation:sea-in var(--dur-ui) var(--ease-out-quart)}
+@keyframes sea-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.scene-note-entry{margin-bottom:.4rem;padding:.35rem .5rem;background:rgba(0,0,0,.2);border-radius:7px;border-left:2px solid rgba(201,146,42,.3)}
+.sne-label{font-family:var(--font-d);font-size:.55rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--gold-light);opacity:.7;margin-bottom:.15rem}
+.sne-text{font-family:var(--font-b);font-size:.78rem;color:var(--parchment-dark);line-height:1.4}
+
+/* SCENE DETAIL PANEL */
+.scene-panel{position:fixed;inset:0;z-index:500;display:flex;flex-direction:column;background:var(--navy-dark);transform:translateY(100%);transition:transform var(--dur-modal) var(--ease-out-quart);will-change:transform}
+.scene-panel.open{transform:translateY(0)}
+.sp-header{background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid));border-bottom:1px solid rgba(201,146,42,.25);padding:.6rem .8rem;display:flex;align-items:center;gap:.5rem;flex-shrink:0;min-height:52px}
+.sp-close{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:var(--parchment-dark);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.sp-title-block{flex:1}
+.sp-act{font-family:var(--font-d);font-size:.52rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--parchment-dark);opacity:.5}
+.sp-title{font-family:var(--font-d);font-size:.82rem;font-weight:700;color:var(--gold-light);line-height:1.2}
+.sl-toggle-btn{padding:.28rem .5rem;border-radius:6px;background:rgba(8,145,178,.15);border:1px solid rgba(8,145,178,.35);font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.05em;color:#67e8f9;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;white-space:nowrap}
+.sl-toggle-btn.active{background:rgba(8,145,178,.35);border-color:#0891b2}
+.sp-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:.75rem}
+.sp-footer{background:var(--navy-dark);border-top:1px solid rgba(201,146,42,.2);padding:.5rem .8rem calc(env(safe-area-inset-bottom) + .4rem);display:grid;grid-template-columns:1fr auto 1fr;gap:.4rem;align-items:center;flex-shrink:0}
+.sp-nav-btn{padding:.42rem .6rem;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);font-family:var(--font-d);font-size:.62rem;font-weight:700;letter-spacing:.04em;color:var(--parchment-dark);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;text-align:center}
+.sp-nav-btn:active{background:rgba(255,255,255,.15)}
+.sp-nav-btn.disabled{opacity:.25;pointer-events:none}
+.sp-done-btn{padding:.45rem .7rem;border:none;border-radius:8px;font-family:var(--font-d);font-size:.68rem;font-weight:700;letter-spacing:.05em;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;background:rgba(42,107,94,.35);border:1px solid rgba(61,154,137,.5);color:#7dd8cc;text-align:center}
+.sp-done-btn.done{background:rgba(42,107,94,.6);border-color:var(--sea-light);color:var(--white)}
+
+/* SCENE DETAIL CONTENT */
+.sp-section{margin-bottom:.9rem}
+.sp-section-label{font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--parchment-dark);opacity:.4;margin-bottom:.38rem}
+.steps-list{display:flex;flex-direction:column;gap:.32rem}
+.step-row{display:flex;gap:.5rem;align-items:flex-start}
+.step-num{font-family:var(--font-d);font-size:.7rem;font-weight:900;color:var(--gold-bright);min-width:18px;flex-shrink:0;line-height:1.5}
+.step-text{font-family:var(--font-b);font-size:.82rem;color:var(--parchment);line-height:1.5}
+.step-text strong{color:var(--gold-light);font-weight:600}
+
+/* READ ALOUD BOX */
+.read-aloud-box{background:linear-gradient(135deg,rgba(13,27,42,.9),rgba(26,46,69,.9));border:1px solid rgba(201,146,42,.3);border-left:3px solid var(--gold);border-radius:8px;padding:.65rem .75rem;position:relative}
+.ra-label{font-family:var(--font-d);font-size:.5rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-light);opacity:.6;margin-bottom:.3rem}
+.ra-text{font-family:var(--font-b);font-style:italic;font-size:.88rem;color:var(--parchment);line-height:1.6}
+.ra-text-sl{display:none}
+.scene-panel.sl-on .ra-text{display:none}
+.scene-panel.sl-on .ra-text-sl{display:block}
+.ra-box2{margin-top:.45rem}
+
+/* SKILL CHECK CALLOUTS */
+.check-list{display:flex;flex-direction:column;gap:.32rem}
+.check-box{display:flex;gap:.45rem;padding:.38rem .5rem;background:rgba(8,145,178,.1);border:1px solid rgba(8,145,178,.25);border-radius:7px;align-items:flex-start}
+.check-dc{font-family:var(--font-d);font-size:.65rem;font-weight:900;color:#67e8f9;white-space:nowrap;flex-shrink:0;padding-top:.05rem}
+.check-body{}
+.check-skill{font-family:var(--font-d);font-size:.6rem;font-weight:700;color:#7dd8cc;margin-bottom:.07rem}
+.check-result{font-family:var(--font-b);font-size:.77rem;color:var(--parchment-dark);line-height:1.35}
+.check-who{font-size:.58rem;font-style:italic;opacity:.65}
+
+/* NPC CHIPS */
+.npc-chips{display:flex;flex-wrap:wrap;gap:.32rem}
+.npc-chip{display:flex;align-items:center;gap:.28rem;padding:.28rem .5rem;background:rgba(201,146,42,.12);border:1px solid rgba(201,146,42,.3);border-radius:20px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:background var(--dur-micro) ease,border-color var(--dur-micro) ease,transform var(--dur-micro) ease}
+.npc-chip:active{background:rgba(201,146,42,.28);transform:scale(0.96)}
+.npc-chip-emoji{font-size:.9rem}
+.npc-chip-name{font-family:var(--font-d);font-size:.6rem;font-weight:700;color:var(--gold-light)}
+
+/* DIALOGUE */
+.dialogue-list{display:flex;flex-direction:column;gap:.45rem}
+.dialogue-entry{padding:.45rem .55rem;background:rgba(0,0,0,.25);border-radius:8px;border-left:2px solid rgba(201,146,42,.4)}
+.dlg-speaker{font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-light);margin-bottom:.22rem}
+.dlg-context{font-family:var(--font-b);font-size:.68rem;color:var(--parchment-dark);opacity:.55;font-style:italic;margin-bottom:.15rem}
+.dlg-en{font-family:var(--font-b);font-style:italic;font-size:.84rem;color:var(--parchment);line-height:1.5}
+.dlg-sl{display:none;font-family:var(--font-b);font-style:italic;font-size:.82rem;color:#7dd8cc;line-height:1.5;margin-top:.18rem;border-top:1px solid rgba(8,145,178,.2);padding-top:.18rem}
+.scene-panel.sl-on .dlg-sl{display:block}
+
+/* BRANCHING */
+.branch-list{display:flex;flex-direction:column;gap:.35rem}
+.branch-row{padding:.38rem .5rem;background:rgba(61,154,137,.08);border:1px solid rgba(61,154,137,.22);border-radius:7px}
+.branch-label{font-family:var(--font-d);font-size:.6rem;font-weight:700;color:#7dd8cc;margin-bottom:.12rem}
+.branch-text{font-family:var(--font-b);font-size:.77rem;color:var(--parchment-dark);line-height:1.4}
+
+/* HOMEBREW REMINDER */
+.hb-box{background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.25);border-radius:8px;padding:.45rem .6rem}
+.hb-label{font-family:var(--font-d);font-size:.55rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#a78bfa;margin-bottom:.18rem}
+.hb-text{font-family:var(--font-b);font-size:.78rem;color:var(--parchment-dark);line-height:1.45}
+.hb-text strong{color:#c4b5fd;font-weight:600}
+
+/* START COMBAT BUTTON */
+.start-combat-btn{width:100%;padding:.6rem;background:linear-gradient(135deg,rgba(192,57,43,.35),rgba(139,58,30,.35));border:1px solid rgba(192,57,43,.5);border-radius:9px;font-family:var(--font-d);font-size:.72rem;font-weight:700;letter-spacing:.06em;color:#ff8a80;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;text-align:center}
+.start-combat-btn:active{background:rgba(192,57,43,.55)}
+
+/* GM NOTES IN PANEL */
+.sp-notes-input{width:100%;min-height:80px;background:rgba(255,255,255,.04);border:1px solid rgba(201,146,42,.18);border-radius:7px;padding:.45rem;font-family:var(--font-b);font-size:.82rem;color:var(--parchment);line-height:1.5;resize:vertical}
+.sp-notes-input:focus{outline:none;border-color:rgba(201,146,42,.45)}
+
+/* SPECIAL TRACKERS */
+.ship-tracker{background:var(--navy);border:1px solid rgba(201,146,42,.2);border-radius:10px;padding:.6rem}
+.ship-tracker-title{font-family:var(--font-d);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-light);margin-bottom:.5rem;text-align:center}
+.ship-row{display:flex;flex-direction:column;gap:.2rem;margin-bottom:.5rem}
+.ship-row:last-of-type{margin-bottom:0}
+.ship-name{font-family:var(--font-d);font-size:.65rem;font-weight:700;color:var(--parchment-dark)}
+.ship-hp-display{display:flex;align-items:center;justify-content:space-between;margin-bottom:.25rem}
+.ship-hp-val{font-family:var(--font-d);font-size:1.1rem;font-weight:900;color:var(--gold-bright)}
+.ship-hp-max{font-family:var(--font-d);font-size:.7rem;color:var(--parchment-dark);opacity:.45}
+.ship-bar-wrap{height:6px;background:rgba(255,255,255,.08);border-radius:3px;margin-bottom:.3rem;overflow:hidden}
+.ship-bar-fill{height:100%;border-radius:3px;transition:width var(--dur-ui) var(--ease-in-out-cubic),background var(--dur-ui) ease}
+.ship-dmg-row{display:flex;gap:.25rem;flex-wrap:wrap}
+.ship-btn{padding:.22rem .4rem;border-radius:5px;font-family:var(--font-d);font-size:.6rem;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;border:none;background:rgba(192,57,43,.25);color:#ff8a80;border:1px solid rgba(192,57,43,.4)}
+.ship-btn:active{background:rgba(192,57,43,.5)}
+.ship-btn.heal{background:rgba(42,107,94,.25);color:#7dd8cc;border-color:rgba(42,107,94,.4)}
+.ship-reset-btn{width:100%;margin-top:.4rem;padding:.3rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;font-family:var(--font-d);font-size:.58rem;font-weight:700;color:var(--parchment-dark);opacity:.6;cursor:pointer;-webkit-tap-highlight-color:transparent}
+
+.ritual-tracker{background:rgba(201,146,42,.06);border:1px solid rgba(201,146,42,.25);border-radius:10px;padding:.6rem}
+.ritual-title{font-family:var(--font-d);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-light);margin-bottom:.45rem;text-align:center}
+.ritual-steps{display:flex;flex-direction:column;gap:.32rem}
+.ritual-step{display:flex;align-items:flex-start;gap:.45rem;padding:.35rem .45rem;background:rgba(0,0,0,.2);border-radius:7px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.ritual-step.done{opacity:.5}
+.ritual-step.done .rs-text{text-decoration:line-through}
+.rs-pip{width:22px;height:22px;border-radius:50%;border:2px solid rgba(201,146,42,.4);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.62rem;transition:background var(--dur-ui) var(--ease-out-cubic),border-color var(--dur-ui) var(--ease-out-cubic),transform var(--dur-micro) ease;will-change:transform}
+.ritual-step:active .rs-pip{transform:scale(0.85)}
+.ritual-step.done .rs-pip{background:var(--gold);border-color:var(--amber);color:var(--navy)}
+.rs-num{font-family:var(--font-d);font-size:.65rem;font-weight:700;color:var(--gold-bright);white-space:nowrap;flex-shrink:0}
+.rs-text{font-family:var(--font-b);font-size:.8rem;color:var(--parchment-dark);line-height:1.4}
+
+.curse-tracker{background:rgba(192,57,43,.08);border:1px solid rgba(192,57,43,.28);border-radius:10px;padding:.6rem}
+.curse-title{font-family:var(--font-d);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#ff8a80;margin-bottom:.1rem;text-align:center}
+.curse-subtitle{font-family:var(--font-b);font-style:italic;font-size:.7rem;color:var(--parchment-dark);opacity:.5;text-align:center;margin-bottom:.45rem}
+.curse-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.32rem}
+.curse-btn{padding:.38rem .25rem;border-radius:7px;background:rgba(0,0,0,.2);border:1px solid rgba(192,57,43,.2);font-family:var(--font-d);font-size:.58rem;font-weight:700;color:var(--parchment-dark);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;text-align:center;display:flex;flex-direction:column;align-items:center;gap:.15rem;min-height:48px;justify-content:center}
+.curse-btn .ce{font-size:1rem}
+.curse-btn.cursed{background:rgba(192,57,43,.28);border-color:var(--red);color:#ff8a80}
+.curse-reset-btn{width:100%;margin-top:.38rem;padding:.28rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:6px;font-family:var(--font-d);font-size:.56rem;font-weight:700;color:var(--parchment-dark);opacity:.55;cursor:pointer;-webkit-tap-highlight-color:transparent}
+
+/* NPC MINI CARD */
+.npc-mini-overlay{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity var(--dur-ui) ease}
+.npc-mini-overlay.open{opacity:1;pointer-events:all}
+.npc-mini-card{background:linear-gradient(135deg,var(--navy-mid),var(--navy));border:2px solid rgba(201,146,42,.4);border-radius:14px;padding:1rem;width:100%;max-width:320px;transform:scale(.95) translateY(6px);transition:transform var(--dur-modal) var(--ease-out-quart);will-change:transform}
+.npc-mini-overlay.open .npc-mini-card{transform:scale(1) translateY(0)}
+.nmc-head{display:flex;align-items:center;gap:.5rem;margin-bottom:.55rem}
+.nmc-emoji{font-size:2rem}
+.nmc-name{font-family:var(--font-d);font-size:.82rem;font-weight:700;color:var(--gold-light)}
+.nmc-role{font-family:var(--font-b);font-style:italic;font-size:.7rem;color:var(--parchment-dark);opacity:.6}
+.nmc-stats{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.5rem}
+.nmc-stat{font-family:var(--font-d);font-size:.6rem;font-weight:700;background:rgba(0,0,0,.3);border-radius:4px;padding:.1rem .35rem;color:var(--parchment-dark)}
+.nmc-action{padding:.32rem .45rem;background:rgba(0,0,0,.2);border-radius:6px;border-left:2px solid rgba(201,146,42,.3);margin-bottom:.3rem}
+.nmc-action:last-child{margin-bottom:0}
+.nmc-an{font-family:var(--font-d);font-size:.62rem;font-weight:700;color:var(--gold-light)}
+.nmc-ad{font-family:var(--font-b);font-size:.74rem;color:var(--parchment-dark);line-height:1.35;margin-top:.07rem}
+.nmc-close{width:100%;margin-top:.6rem;padding:.38rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:7px;font-family:var(--font-d);font-size:.65rem;font-weight:700;color:var(--parchment-dark);cursor:pointer;-webkit-tap-highlight-color:transparent}
+
+/* COMBAT TAB */
+.add-form{background:var(--navy);border:1px solid rgba(201,146,42,.25);border-radius:10px;padding:.6rem;margin-bottom:.65rem}
+.add-form-title{font-family:var(--font-d);font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-light);margin-bottom:.45rem}
+.add-row{display:grid;grid-template-columns:1fr 52px 52px 52px;gap:.35rem;align-items:center;margin-bottom:.35rem}
+.add-input{background:var(--navy-light);border:1px solid rgba(201,146,42,.3);border-radius:6px;color:var(--white);font-family:var(--font-b);font-size:.88rem;padding:.3rem .45rem;width:100%}
+.add-input:focus{outline:none;border-color:var(--gold)}
+.add-input.small{text-align:center;-webkit-appearance:none}
+.add-btn{padding:.38rem .5rem;border:none;border-radius:6px;font-family:var(--font-d);font-size:.65rem;font-weight:700;letter-spacing:.04em;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;background:linear-gradient(135deg,var(--gold),var(--amber));color:var(--navy)}
+.quick-add-row{display:flex;flex-wrap:wrap;gap:.28rem}
+.qa-btn{padding:.25rem .4rem;border-radius:5px;background:rgba(255,255,255,.06);border:1px solid rgba(201,146,42,.2);font-family:var(--font-d);font-size:.52rem;font-weight:700;color:var(--parchment-dark);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:all .13s}
+.qa-btn:active{background:rgba(201,146,42,.2);border-color:var(--gold);color:var(--gold-light)}
+.combat-controls{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem}
+.round-display{font-family:var(--font-d);font-size:.72rem;font-weight:700;color:var(--parchment-dark)}
+.round-display span{font-size:1.4rem;color:var(--gold-bright);font-weight:900}
+.next-btn{padding:.45rem .9rem;background:linear-gradient(135deg,var(--sea),var(--sea-light));border:none;border-radius:8px;font-family:var(--font-d);font-size:.72rem;font-weight:700;letter-spacing:.05em;color:var(--white);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.clear-btn{padding:.3rem .55rem;background:rgba(139,58,30,.2);border:1px solid rgba(139,58,30,.4);border-radius:6px;font-family:var(--font-d);font-size:.6rem;font-weight:700;color:#e8956d;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.combatant-list{display:flex;flex-direction:column;gap:.4rem}
+.combatant-row{background:var(--navy);border:1px solid rgba(201,146,42,.15);border-radius:10px;padding:.5rem .6rem;transition:border-color var(--dur-ui) var(--ease-out-cubic),background var(--dur-ui) var(--ease-out-cubic),box-shadow var(--dur-ui) ease;position:relative}
+.combatant-row.active-turn{border-color:var(--gold-bright);background:linear-gradient(135deg,rgba(201,146,42,.12),var(--navy));box-shadow:0 0 12px rgba(201,146,42,.2)}
+.combatant-row.type-player{border-left:3px solid var(--sea-light)}
+.combatant-row.type-enemy{border-left:3px solid #ef4444}
+.combatant-row.type-npc{border-left:3px solid var(--gold)}
+@keyframes combatant-in{from{opacity:0;transform:scale(0.97) translateY(4px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes hp-flash-dmg{0%{transform:scale(1.15)}50%{transform:scale(0.92)}100%{transform:scale(1)}}
+@keyframes hp-flash-heal{0%{transform:scale(0.88)}70%{transform:scale(1.1)}100%{transform:scale(1)}}
+.combatant-top{display:flex;align-items:center;gap:.5rem;margin-bottom:.38rem}
+.c-init{font-family:var(--font-d);font-size:.78rem;font-weight:900;color:var(--gold-bright);width:26px;text-align:center;flex-shrink:0}
+.c-name{font-family:var(--font-d);font-size:.72rem;font-weight:700;color:var(--parchment);flex:1}
+.c-hp-display{font-family:var(--font-d);font-size:.72rem;font-weight:700;color:var(--gold-light);white-space:nowrap;transition:color var(--dur-ui) ease;will-change:transform}
+.c-hp-display.danger{color:#ff6b6b}
+.c-hp-display.warning{color:#ffa94d}
+.c-hp-display.anim-dmg{animation:hp-flash-dmg 280ms var(--ease-out-cubic)}
+.c-hp-display.anim-heal{animation:hp-flash-heal 260ms var(--ease-out-cubic)}
+.c-remove{width:26px;height:26px;border-radius:50%;background:rgba(139,58,30,.2);border:1px solid rgba(139,58,30,.3);color:#e8956d;font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.hp-bar-wrap{height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-bottom:.38rem;overflow:hidden}
+.hp-bar-fill{height:100%;border-radius:2px;transition:width var(--dur-ui) var(--ease-in-out-cubic),background var(--dur-ui) ease;background:var(--sea-light)}
+.hp-bar-fill.warning{background:var(--amber)}
+.hp-bar-fill.danger{background:#ef4444}
+.dmg-row{display:flex;gap:.25rem;flex-wrap:wrap;align-items:center}
+.dmg-btn{padding:.22rem .38rem;border-radius:5px;font-family:var(--font-d);font-size:.58rem;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;border:none}
+.dmg-btn.neg{background:rgba(192,57,43,.25);color:#ff8a80;border:1px solid rgba(192,57,43,.4)}
+.dmg-btn.neg:active{background:rgba(192,57,43,.5)}
+.dmg-btn.pos{background:rgba(42,107,94,.25);color:#7dd8cc;border:1px solid rgba(42,107,94,.4)}
+.dmg-btn.pos:active{background:rgba(42,107,94,.5)}
+.custom-dmg{width:46px;background:var(--navy-light);border:1px solid rgba(201,146,42,.25);border-radius:5px;color:var(--white);font-family:var(--font-d);font-size:.7rem;font-weight:700;text-align:center;padding:.18rem;-webkit-appearance:none}
+.custom-dmg:focus{outline:none;border-color:var(--gold)}
+.apply-btn{padding:.22rem .45rem;border-radius:5px;background:rgba(201,146,42,.2);border:1px solid rgba(201,146,42,.4);color:var(--gold-light);font-family:var(--font-d);font-size:.58rem;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.empty-combat{text-align:center;padding:2rem 1rem;font-family:var(--font-b);font-style:italic;font-size:.85rem;color:var(--parchment-dark);opacity:.4}
+
+/* PARTY TAB */
+.party-grid{display:flex;flex-direction:column;gap:.55rem}
+.pc-card{background:var(--navy);border:1px solid rgba(201,146,42,.18);border-radius:10px;overflow:hidden}
+.pc-head{background:linear-gradient(135deg,var(--navy-mid),var(--navy-light));padding:.5rem .65rem;display:flex;align-items:center;gap:.5rem;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.pc-emoji{font-size:1.6rem;flex-shrink:0}
+.pc-info{flex:1}
+.pc-name{font-family:var(--font-d);font-size:.72rem;font-weight:700;color:var(--gold-light)}
+.pc-class{font-family:var(--font-b);font-size:.68rem;color:var(--parchment-dark);opacity:.6;font-style:italic}
+.pc-stats-row{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.2rem}
+.pc-stat-chip{font-family:var(--font-d);font-size:.55rem;font-weight:700;background:rgba(0,0,0,.3);border-radius:4px;padding:.07rem .3rem;color:var(--parchment-dark)}
+.pc-detail{padding:.5rem .65rem;border-top:1px solid rgba(201,146,42,.1);display:none}
+.pc-detail.open{display:block}
+.pc-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:.28rem;margin-bottom:.4rem}
+.pc-detail-label{font-family:var(--font-d);font-size:.52rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--parchment-dark);opacity:.5;display:block;margin-bottom:.08rem}
+.pc-feat-list{font-family:var(--font-b);font-size:.75rem;color:var(--parchment-dark);line-height:1.55}
+.pc-weapon-list{display:flex;flex-direction:column;gap:.2rem;margin-top:.3rem}
+.pc-weapon{display:flex;gap:.4rem;font-family:var(--font-d);font-size:.62rem}
+.pcw-name{color:var(--gold-light);flex:1}
+.pcw-hit{color:#7dd8cc}
+.pcw-dmg{color:#e8956d}
+
+/* NPC TAB */
+.npc-list{display:flex;flex-direction:column;gap:.55rem}
+.npc-card{background:var(--navy);border:1px solid rgba(201,146,42,.18);border-radius:10px;overflow:hidden}
+.npc-head{padding:.55rem .7rem;display:flex;align-items:center;gap:.5rem;cursor:pointer;-webkit-tap-highlight-color:transparent;background:linear-gradient(135deg,var(--navy-mid),var(--navy-light))}
+.npc-emoji{font-size:1.6rem;flex-shrink:0}
+.npc-name{font-family:var(--font-d);font-size:.75rem;font-weight:700;color:var(--gold-light)}
+.npc-role{font-family:var(--font-b);font-size:.68rem;color:var(--parchment-dark);opacity:.6;font-style:italic}
+.npc-key-stats{display:flex;gap:.35rem;margin-top:.18rem;flex-wrap:wrap}
+.npc-stat{font-family:var(--font-d);font-size:.56rem;font-weight:700;background:rgba(0,0,0,.35);border-radius:4px;padding:.07rem .32rem;color:var(--parchment-dark)}
+.npc-body{padding:.6rem .7rem;border-top:1px solid rgba(201,146,42,.1);display:none}
+.npc-body.open{display:block}
+.stat-block-row{display:grid;grid-template-columns:repeat(6,1fr);gap:.25rem;margin:.4rem 0}
+.sbl-box{background:rgba(0,0,0,.25);border-radius:6px;text-align:center;padding:.3rem .15rem}
+.sbl-label{font-family:var(--font-d);font-size:.42rem;font-weight:700;text-transform:uppercase;color:var(--gold-light);letter-spacing:.05em}
+.sbl-score{font-family:var(--font-d);font-size:1rem;font-weight:900;color:var(--white);line-height:1}
+.sbl-mod{font-family:var(--font-d);font-size:.62rem;font-weight:700;color:var(--gold-bright)}
+.npc-section-label{font-family:var(--font-d);font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--parchment-dark);opacity:.45;margin:.5rem 0 .28rem}
+.action-list{display:flex;flex-direction:column;gap:.3rem}
+.action-row{padding:.32rem .45rem;background:rgba(0,0,0,.2);border-radius:6px;border-left:2px solid rgba(201,146,42,.3)}
+.action-name{font-family:var(--font-d);font-size:.65rem;font-weight:700;color:var(--gold-light)}
+.action-desc{font-family:var(--font-b);font-size:.75rem;color:var(--parchment-dark);line-height:1.4;margin-top:.1rem}
+.action-desc strong{color:var(--white);font-weight:600}
+.npc-personality{font-family:var(--font-b);font-style:italic;font-size:.78rem;color:var(--parchment-dark);line-height:1.4;padding:.38rem .5rem;background:rgba(201,146,42,.06);border-radius:6px;border-left:2px solid var(--gold)}
+.npc-secret{margin-top:.45rem;padding:.38rem .5rem;background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.3);border-radius:6px}
+.npc-secret-label{font-family:var(--font-d);font-size:.52rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#ff8a80;margin-bottom:.18rem}
+.npc-secret-text{font-family:var(--font-b);font-size:.75rem;color:var(--parchment-dark);line-height:1.4}
+.outcome-list{display:flex;flex-direction:column;gap:.28rem;margin-top:.35rem}
+.outcome-row{padding:.32rem .45rem;background:rgba(0,0,0,.2);border-radius:6px;border-left:2px solid rgba(61,154,137,.4)}
+.outcome-label{font-family:var(--font-d);font-size:.6rem;font-weight:700;color:#7dd8cc}
+.outcome-desc{font-family:var(--font-b);font-size:.74rem;color:var(--parchment-dark);margin-top:.08rem;line-height:1.35}
+.add-to-combat-btn{margin-top:.45rem;width:100%;padding:.38rem;background:rgba(42,107,94,.2);border:1px solid rgba(61,154,137,.4);border-radius:7px;font-family:var(--font-d);font-size:.62rem;font-weight:700;color:#7dd8cc;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;letter-spacing:.04em}
+.heart-mechanic{margin-top:.45rem;padding:.4rem .55rem;background:rgba(255,215,106,.06);border:1px solid rgba(255,215,106,.25);border-radius:8px}
+.heart-label{font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-bright);margin-bottom:.18rem}
+.heart-text{font-family:var(--font-b);font-size:.77rem;color:var(--parchment-dark);line-height:1.4}
+.heart-text strong{color:var(--gold-bright)}
+
+/* LOOT TAB */
+.loot-list{display:flex;flex-direction:column;gap:.55rem}
+.loot-card{background:var(--navy);border:1px solid rgba(201,146,42,.18);border-radius:10px;padding:.6rem .7rem}
+.loot-card.distributed{opacity:.55;border-color:rgba(61,154,137,.3)}
+.loot-header{display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem}
+.loot-emoji{font-size:1.5rem;flex-shrink:0}
+.loot-name{font-family:var(--font-d);font-size:.75rem;font-weight:700;color:var(--gold-light);flex:1}
+.rarity-badge{font-family:var(--font-d);font-size:.5rem;font-weight:700;border-radius:3px;padding:.06rem .28rem;letter-spacing:.05em}
+.rarity-common{background:rgba(156,163,175,.15);color:var(--common);border:1px solid rgba(156,163,175,.25)}
+.rarity-uncommon{background:rgba(74,222,128,.12);color:var(--uncommon);border:1px solid rgba(74,222,128,.22)}
+.rarity-rare{background:rgba(147,197,253,.12);color:var(--rare);border:1px solid rgba(147,197,253,.22)}
+.rarity-very-rare{background:rgba(196,181,253,.12);color:var(--very-rare);border:1px solid rgba(196,181,253,.22)}
+.rarity-legendary{background:rgba(255,215,106,.12);color:var(--legendary);border:1px solid rgba(255,215,106,.22)}
+.cursed-badge{font-family:var(--font-d);font-size:.5rem;font-weight:700;border-radius:3px;padding:.06rem .28rem;background:rgba(192,57,43,.2);color:#ff8a80;border:1px solid rgba(192,57,43,.35);letter-spacing:.05em}
+.loot-type{font-family:var(--font-b);font-style:italic;font-size:.65rem;color:var(--parchment-dark);opacity:.5;margin-bottom:.28rem}
+.loot-desc{font-family:var(--font-b);font-size:.78rem;color:var(--parchment-dark);line-height:1.45;margin-bottom:.32rem}
+.loot-fx{font-family:var(--font-d);font-size:.6rem;font-weight:600;color:#a78bfa;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.22);border-radius:5px;padding:.22rem .4rem;margin-bottom:.42rem;line-height:1.4}
+.loot-assign-row{display:flex;gap:.35rem;align-items:center;margin-bottom:.35rem}
+.assign-label{font-family:var(--font-d);font-size:.56rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--parchment-dark);opacity:.5;white-space:nowrap}
+.assign-select{flex:1;background:var(--navy-light);border:1px solid rgba(201,146,42,.3);border-radius:6px;color:var(--white);font-family:var(--font-d);font-size:.68rem;font-weight:600;padding:.28rem .45rem;appearance:none;cursor:pointer}
+.loot-actions{display:flex;gap:.35rem}
+.copy-btn{flex:1;padding:.38rem .5rem;background:linear-gradient(135deg,var(--gold),var(--amber));border:none;border-radius:7px;font-family:var(--font-d);font-size:.65rem;font-weight:700;letter-spacing:.05em;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.copy-btn:active{opacity:.85}
+.sent-btn{padding:.38rem .6rem;background:rgba(42,107,94,.2);border:1px solid rgba(61,154,137,.35);border-radius:7px;font-family:var(--font-d);font-size:.65rem;font-weight:700;color:#7dd8cc;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.sent-btn.active{background:rgba(42,107,94,.45);border-color:var(--sea-light)}
+.loot-code-display{margin-top:.35rem;padding:.35rem .45rem;background:rgba(0,0,0,.3);border-radius:6px;border:1px solid rgba(201,146,42,.15);font-family:'Courier New',monospace;font-size:.6rem;color:var(--gold-bright);word-break:break-all;display:none}
+.loot-code-chip{margin-top:.45rem;display:flex;align-items:center;gap:.5rem;padding:.42rem .6rem;background:linear-gradient(135deg,rgba(201,146,42,.18),rgba(201,146,42,.07));border:1px solid rgba(201,146,42,.45);border-radius:8px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.loot-code-chip:active{opacity:.82}
+.cc-lbl{font-family:var(--font-d);font-size:.5rem;font-weight:700;letter-spacing:.12em;color:rgba(201,146,42,.65)}
+.cc-val{font-family:'Courier New',monospace;font-size:1rem;font-weight:700;letter-spacing:.14em;color:var(--gold-bright);flex:1}
+.cc-ico{font-size:.85rem;opacity:.65}
+
+/* TOAST */
+#toast{position:fixed;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom) + 10px);left:50%;transform:translateX(-50%);z-index:999;pointer-events:none}
+.toast-msg{background:var(--navy-mid);border:1px solid rgba(201,146,42,.5);border-radius:10px;padding:.42rem .85rem;font-family:var(--font-d);font-size:.68rem;font-weight:700;letter-spacing:.05em;color:var(--gold-light);box-shadow:0 4px 16px rgba(0,0,0,.5);white-space:nowrap;animation:tin .2s ease,tout .3s ease 1.8s forwards}
+@keyframes tin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tout{to{opacity:0;transform:translateY(-4px)}}
+::-webkit-scrollbar{width:2px}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:1px}
+@media(hover:hover) and (pointer:fine){
+  .scene-row:hover{border-color:rgba(201,146,42,.3)}
+  .npc-chip:hover{background:rgba(201,146,42,.22);border-color:rgba(201,146,42,.5)}
+  .qa-btn:hover{background:rgba(201,146,42,.18);border-color:var(--gold)}
+}
+</style>
+</head>
+<body>
+<div class="gm-header">
+  <div class="gm-title">☠ Gilded Kraken — GM</div>
+  <div class="gm-badge">GM ONLY</div>
+</div>
+<div id="tab-notes" class="tab-content active"></div>
+<div id="tab-combat" class="tab-content"></div>
+<div id="tab-party" class="tab-content"></div>
+<div id="tab-npcs" class="tab-content"></div>
+<div id="tab-loot" class="tab-content"></div>
+<div class="tab-bar">
+  <div class="tab-btn active" onclick="switchTab('notes')"><span class="ti">📋</span><span class="tl">Notes</span></div>
+  <div class="tab-btn" onclick="switchTab('combat')"><span class="ti">⚔️</span><span class="tl">Combat</span></div>
+  <div class="tab-btn" onclick="switchTab('party')"><span class="ti">👥</span><span class="tl">Party</span></div>
+  <div class="tab-btn" onclick="switchTab('npcs')"><span class="ti">🎭</span><span class="tl">NPCs</span></div>
+  <div class="tab-btn" onclick="switchTab('loot')"><span class="ti">📦</span><span class="tl">Loot</span></div>
+</div>
+<!-- Scene Detail Panel -->
+<div class="scene-panel" id="scene-panel">
+  <div class="sp-header">
+    <div class="sp-close" onclick="closeScenePanel()">✕</div>
+    <div class="sp-title-block">
+      <div class="sp-act" id="sp-act-label"></div>
+      <div class="sp-title" id="sp-title"></div>
+    </div>
+    <div class="sl-toggle-btn" id="sl-toggle-btn" onclick="toggleSL()">SL</div>
+  </div>
+  <div class="sp-body" id="sp-body" ontouchstart="spTouchStart(event)" ontouchend="spTouchEnd(event)"></div>
+  <div class="sp-footer">
+    <div class="sp-nav-btn" id="sp-prev" onclick="navigateScene(-1)">← Prev</div>
+    <div class="sp-done-btn" id="sp-done-btn" onclick="toggleSceneFromPanel()">Mark Done</div>
+    <div class="sp-nav-btn" id="sp-next" onclick="navigateScene(1)">Next →</div>
+  </div>
+</div>
+<!-- NPC Mini Card -->
+<div class="npc-mini-overlay" id="npc-mini-overlay" onclick="closeNPCMini()">
+  <div class="npc-mini-card" id="npc-mini-card" onclick="event.stopPropagation()">
+    <div id="nmc-content"></div>
+    <button class="nmc-close" onclick="closeNPCMini()">Close</button>
+  </div>
+</div>
+<div id="toast"></div>
+<script>
+'use strict';
+// ══ SCENE DATA ══
+const SCENES=[
+  {id:'a1s1',act:1,label:'Scene 1 — The Map',desc:'Character intros · Barnacle Pete · One-Eye Giulia · The map revealed'},
+  {id:'a1s2',act:1,label:'Scene 2 — Naval Skirmish',desc:'Crimson Revenge · Doña Sangrienta · Ship combat → boarding · Outcome A or B'},
+  {id:'a1s3',act:1,label:'Scene 3 — Isla Maldita',desc:'Upside-down trees · Military crabs · Lighthouse: GO AWAY'},
+  {id:'a2ea',act:2,label:'Encounter A — Gerald',desc:'Crab general · 47 years drilling · The Gull Situation · 80gp reward'},
+  {id:'a2eb',act:2,label:'Encounter B — The Shrine',desc:'Nameless god · Tablet clue · Rum of the Depths + ritual scroll · Net trap'},
+  {id:'a2ec',act:2,label:'Encounter C — Prospero Finch',desc:'Marooned sailor · 60% accurate · 200 years old · Has a secret'},
+  {id:'a2r1',act:2,label:'Room 1 — Flooded Entry Hall',desc:'Waist-deep water · Three levers · TIDE → STAR → MOON'},
+  {id:'a2r2',act:2,label:'Room 2 — Hall of Unwise Decisions',desc:'Six murals · Pressure plate trap · Boots of Confident Incompetence'},
+  {id:'a2r3',act:2,label:'Room 3 — The Guardian',desc:'Water Weird + 2 Giant Crabs · Negotiate or fight · Compass reward'},
+  {id:'a2r4',act:2,label:'Room 4 — The Vault',desc:'The gold is warm · Touch it → Kraken wakes · Curse of Gilded Greed'},
+  {id:'a3s6',act:3,label:'Scene 6 — The Golden Kraken',desc:'Let it monologue · Three paths · Heart mechanic · 3-step ritual'},
+  {id:'a3s7',act:3,label:'Scene 7 — Aftermath',desc:'Doña arrives · Ring crumbles · Pete cooks · Giulia\'s poem'},
+];
+const SEA_EVENTS=[
+  'A message in a bottle floats past. Strongly-worded complaint letter to the Kraken. Dated 150 years ago.',
+  'It starts raining. Only on the ship. Not around it. Just directly on the ship. No explanation.',
+  'A seagull lands on one player\'s head and refuses to leave. It is clearly judging them. Gerald would be upset.',
+  'Another pirate ship passes in the distance. It waves politely. Continues without incident. This is suspicious.',
+  'One character\'s rope comes undone. They know they tied it. They definitely tied it.',
+  'A very small whale surfaces near the ship, looks at everyone, sighs audibly, and dives again.',
+];
+// ══ SCENE DETAILS ══
+const SD={
+  a1s1:{
+    steps:['Ask each player: <strong>what is your character doing on deck right now?</strong> Give them 30 seconds each. This is their intro moment.',
+      'Barnacle Pete arrives with breakfast. Describe it badly. <strong>It is unclear what it is.</strong> He is very proud of it.',
+      'One-Eye Giulia appears at the rail, watching the horizon. No-nonsense. She notices you noticing the map.',
+      'The map is produced — describe it: <strong>skull wearing a crown, "HERE LIETH THE TREASURY OF THE GILDED KRAKEN. ABANDON ALL APPETITE."</strong>',
+      'Let players debate whether it is real. It obviously is. Do not confirm this yet.',
+      'If asked about the dying pirate: won fair in cards. He whispered his last words and fell face-first into his rum.'],
+    ra:{en:'The deck of the Drunken Seahorse is warm under the morning sun. The Amber Sea stretches in every direction — impossibly blue, improbably calm. Barnacle Pete has arrived with breakfast. It smells of salt and choices. One-Eye Giulia stands at the rail, not watching the sea so much as measuring it. And then there is the map. Drawn on the back of a tavern receipt. Pointing to an island with no name.',
+      sl:'Paluba Pijanega Morskega Konja je topla pod jutranjimsuncem. Jantarsko Morje se razteza v vse smeri — neverjetno modro, neverjetno mirno. Barnacle Pete je prinesel zajtrk. Smrdi po soli in slabih odločitvah. Giulia z Enim Očesom stoji ob ograji in meri morje. In potem je tu zemljevid. Narisan na hrbtni strani računa iz gostilne.'},
+    ra2:null,
+    checks:[
+      {dc:12,skill:'History',who:'Zvonko auto-succeeds',result:'Recognises the treasury symbol as connected to the Gilded Kraken legends — real stories told in every Amber Sea port. The treasure is supposed to be cursed.'},
+      {dc:14,skill:'Investigation (the map)',who:'anyone',result:'The ink is recent. Someone recopied this map within the last few years. The original was older.'},
+      {dc:10,skill:'Insight (Giulia)',who:'anyone',result:'She has seen that symbol before. She does not want to say where.'},
+    ],
+    npcs:['pete','giulia'],
+    dialogue:[
+      {speaker:'Barnacle Pete',ctx:'offering breakfast',en:'"I\'ve made my special. It\'s got the — the thing in it. The texture. You\'ll like it. Everyone likes it." (nobody has ever liked it)',sl:'"Naredil sem svojo specialiteto. Ima tisto — tisto stvar v njej. Teksturo. Vam bo všeč." (ni se še nikomur zdelo všeč)'},
+      {speaker:'One-Eye Giulia',ctx:'when shown the map, quietly',en:'"I\'ve seen that symbol before. In a book I burned." She does not elaborate.',sl:'"Že sem videla ta simbol. V knjigi, ki sem jo zažgala." Ne nadaljuje.'},
+      {speaker:'Dying pirate\'s last words',ctx:'flashback / read aloud',en:'"The Gilded Kraken never gives back what it takes... heh... you\'ll see..."',sl:'"Zlati Kraken nikoli ne vrne, kar vzame... heh... boste videli..."'},
+    ],
+    branching:null,
+    homebrew:null,
+    loot:[],
+    combat:null,
+    special:null,
+  },
+  a1s2:{
+    steps:['A ship on the horizon. Flying red and black. Moving fast — too fast for a merchant.',
+      'Read the arrival description. Give players time to prepare and assign crew roles.',
+      '<strong>Ship Combat:</strong> Each round, crew assigns 4 roles (Helmsman/Cannoneer/Rigger/Wild Card). Run 3–4 rounds.',
+      'When ships are adjacent: <strong>boarding begins.</strong> Standard D&D combat resumes on the enemy deck.',
+      'Doña fights to capture the map, not to kill. Her crew fights to protect her.',
+      '<strong>Outcome A:</strong> Players win / she escapes — she vows revenge, sails away, ring on her finger glinting.',
+      '<strong>Outcome B:</strong> She is captured — proceed to her dialogue below. She reveals the curse.'],
+    ra:{en:'The flag is red and black, and it is moving fast. Too fast for a merchant. The ship is long and low — built for catching things. A figure stands at the bow in a coat the colour of dried blood, one hand on the rail, watching you approach. She looks like someone who has caught things before. Many things. She is not done catching.',
+      sl:'Zastava je rdeče-črna in se hitro premika. Prehitro za trgovca. Ladja je dolga in nizka — zgrajena za lovljenje. Postava stoji na premcu v plašču barve posušene krvi, z roko na ograji, in vas opazuje. Izgleda kot nekdo, ki je že veliko stvari ujel. Še ni končala.'},
+    ra2:null,
+    checks:[
+      {dc:12,skill:'Perception',who:'anyone on deck',result:'The Crimson Revenge is lowering a second, smaller boat on the far side — an escape route if things go badly for her.'},
+      {dc:14,skill:'History',who:'anyone',result:'The Crimson Revenge has a reputation across the Amber Sea: fast, relentless, and it never negotiates. Except Doña is opening with a negotiation. Something is different this time.'},
+      {dc:10,skill:'Insight (when Doña speaks)',who:'anyone',result:'She is not angry. She is desperate. There is something wrong with her right hand — she keeps it in her pocket.'},
+    ],
+    npcs:['dona','pirate','veteran'],
+    dialogue:[
+      {speaker:'Doña Sangrienta',ctx:'opening call across the water',en:'"That map belongs to my family. I will give you one chance to hand it over and sail away with your lives. One chance. This is it."',sl:'"Ta zemljevid pripada moji družini. Dajem vam eno priložnost, da ga izročite in odplujete z življenjem. Eno priložnost. To je ona."'},
+      {speaker:'Doña Sangrienta',ctx:'if they refuse',en:'"Wrong answer." *[she draws her rapier]* "Let\'s see if you bleed the same colour as your flag."',sl:'"Napačen odgovor." *[potegne meč]* "Poglejmo, ali krvavite isto barvo kot vaša zastava."'},
+      {speaker:'Doña Sangrienta',ctx:'Outcome B — captured, after a pause',en:'"You want to know about the map. Fine." *[she holds up her right hand — one finger is turning gold, skin slowly gilding outward]* "Everyone who touched that gold is either dead or becoming something else. I\'ve been looking for someone stupid enough to go back and undo what was done."',sl:'"Hočete vedeti za zemljevid. Dobro." *[pokaže desno roko — en prst se obrača v zlato]* "Vsi, ki so se dotaknili tistega zlata, so mrtvi ali pa postajajo nekaj drugega."'},
+    ],
+    branching:[
+      {label:'Outcome A — Defeated / Escaped',d:'She sails away. She will be back at the start of Act 3, alone, with a few crew. Her finger is worse by then. She owes no one anything — but the ring crumbles when the curse breaks.'},
+      {label:'Outcome B — Captured or Allied',d:'She will travel with the party to the island. She has been there before and barely survived — she knows the beach, knows Gerald exists (didn\'t talk to him), knows the ruins are real. She wants the curse broken. She will not pretend to be grateful about needing help.'},
+    ],
+    homebrew:'<strong>Ship Combat — each round assign 4 roles:</strong><br>• <strong>Helmsman</strong> DEX/Acrobatics DC 14 → success: ADV next cannon<br>• <strong>Cannoneer</strong> Attack +5 vs AC 13 → hit: 4d10 hull<br>• <strong>Rigger</strong> INT/Nature DC 12 → success: +2 next Helmsman check<br>• <strong>Wild Card</strong> creative action (GM call)<br><br><strong>Hull Points:</strong> Seahorse 50 · Revenge 60 · Sinking ship: 3 rounds to board or abandon.',
+    loot:[],
+    combat:[{id:'dona',count:1,hp:52},{id:'veteran',count:1,hp:58},{id:'pirate',count:6,hp:5}],
+    special:'ship',
+  },
+  a1s3:{
+    steps:['Island appears at dawn. Read the description slowly.',
+      'The lighthouse is blinking. Let a player notice it. If they try to decode: DC 10 or maritime background.',
+      'Decoded message: <strong>GO AWAY</strong>. Two words. The island is not subtle.',
+      'The crabs are in military formation on the beach. They are moving with purpose.',
+      'Give players a moment to react. Ask what they do. Land or observe?'],
+    ra:{en:'The island appears as the sun rises — or rather, the island was probably always there. You just couldn\'t see it until now. The trees grow upside down. Roots in the air, canopy buried in soil. The beach is alive with crabs — hundreds of them, moving in formation. Left flank. Right flank. Pivot. Hold. A lighthouse blinks in the distance. No keeper. The flashes spell something.',
+      sl:'Otok se prikaže ob sončnem vzhodu — ali pa je bil vedno tam. Samo videti ga niste mogli. Drevesa rastejo narobe. Korenine v zraku, krošnje v tleh. Plaža mrgoli od rakov — stotine, v formaciji. Leva stran. Desna stran. Zasuk. Drži. Svetilnik utriplja v daljavi. Brez skrbnika. Utripanje govori nekaj.'},
+    ra2:null,
+    checks:[
+      {dc:10,skill:'Investigation or Navigation (maritime)',who:'anyone / Zvonko auto',result:'Lighthouse is using Morse code. Someone set this up deliberately.'},
+      {dc:12,skill:'Intelligence to decode',who:'anyone who noticed',result:'"GO. AWAY." That is the complete message. It repeats every 30 seconds.'},
+      {dc:14,skill:'Nature',who:'anyone',result:'The inverted trees are biologically impossible — and alive. Their root systems appear to be actively photosynthesising in open air. This island does not follow normal rules.'},
+    ],
+    npcs:[],
+    dialogue:[
+      {speaker:'Anyone decoding the Morse',ctx:'reading the lighthouse',en:'"It says... Go away. The lighthouse says go away."',sl:'"Piše... Pojdite stran. Svetilnik piše pojdite stran."'},
+      {speaker:'Barnacle Pete',ctx:'from behind, carrying a pot',en:'"I\'ve cooked on a lot of ships. I\'ve seen a lot of ports. I have never once wanted to get off a ship as badly as I do right now."',sl:'"Kuhal sem na mnogih ladjah. Videl sem mnoga pristanišča. Nikoli še nisem tako hotel zapustiti ladje kot zdaj."'},
+    ],
+    branching:null,
+    homebrew:'<strong>Sea Legs:</strong> When the GM decides there\'s a big wave or sudden movement — all players DC 10 DEX save or fall prone. Nat 1: overboard (rope saves them, next turn to climb back). Nat 20: they look impossibly cool. They describe how.',
+    loot:[],
+    combat:null,
+    special:null,
+  },
+  a2ea:{
+    steps:['Players encounter the formation. One crab is clearly in command — slightly larger, slightly stiller.',
+      'If players approach peacefully and patiently: Gerald acknowledges them.',
+      '<strong>Without Speak with Animals:</strong> DC 14 Animal Handling — Gerald responds to structured, disciplined movement. He respects order.',
+      '<strong>With Speak with Animals</strong> (Vuk\'s patron can gift this once, or Zvonko via ritual): Gerald briefs them on the Gull Situation.',
+      'Gull resolution: Thunderwave, scare them off, creative solution. Gerald evaluates the approach professionally.',
+      'Reward: <strong>80gp in pearls + safe path marked on map + lever code: TIDE → STAR → MOON.</strong>'],
+    ra:{en:'The crabs move in perfect synchronisation — left flank, right flank, pivot, hold. One stands apart from the rest, slightly larger, slightly stiller. It watches you approach with an expression that, on a crab, manages to communicate profound military authority. It taps one claw on the sand in a precise pattern. The others snap to attention.',
+      sl:'Raki se premikajo v popolni sinhronizaciji — leva stran, desna stran, zasuk, drži. Eden stoji ločeno od ostalih, nekoliko večji, nekoliko bolj negiben. Opazuje vaš pristop z izrazom, ki na raku na nek način komunicira globoko vojaško avtoriteto.'},
+    ra2:null,
+    checks:[
+      {dc:12,skill:'History',who:'Zvonko auto',result:'The formation resembles 16th century pike square tactics — specifically a defensive formation used in naval infantry. Gerald has been drilling for a very long time.'},
+      {dc:14,skill:'Animal Handling (without Speak with Animals)',who:'anyone',result:'Gerald responds to disciplined, unhurried movement. He will not attack unprovoked. He is evaluating you.'},
+      {dc:10,skill:'Perception',who:'anyone who looks at the rocks',result:'A seagull is sitting on a nearby rock, watching the crab formation with what can only be described as suspicious interest. Gerald\'s intelligence may be correct.'},
+    ],
+    npcs:['gerald'],
+    dialogue:[
+      {speaker:'Gerald',ctx:'on first contact, via Speak with Animals',en:'"Halt. Identify yourselves and your operational purpose on this island."',sl:'"Stoj. Identificirajte se in navedite namen svojega operativnega poslanstva na tem otoku."'},
+      {speaker:'Gerald',ctx:'explaining the Gull Situation',en:'"Surveillance. Northeast quadrant, 0400 hours. Seventeen confirmed sightings over forty-seven years. I have documentation." *[taps a complex pattern in the sand]* "They report to a rival faction. The evidence is circumstantial but compelling."',sl:'"Nadzorovanje. Severovzhodni kvadrant, 04:00. Sedemnajst potrjenih opazovanj v sedeminštiridesetih letih. Imam dokumentacijo."'},
+      {speaker:'Gerald',ctx:'after the gull situation is resolved, professionally',en:'"Efficient. Unconventional. You fight with some discipline, for mammals." *[pause]* "The ruins. Safe path. Third lever goes last — moon. Do not touch the second lever first."',sl:'"Učinkovito. Nekonvencionalno. Borite se z nekakšno disciplino, za sesalce."'},
+    ],
+    branching:[
+      {label:'Players help Gerald',d:'He marks the safe path to the ruins and gives the TIDE→STAR→MOON lever code. 80gp in pearls. He does not say thank you but he does give a very precise, formal nod.'},
+      {label:'Players ignore or antagonise Gerald',d:'He does not attack — he is a professional. But he will not help either. They navigate the beach without the safe path or the lever code.'},
+    ],
+    homebrew:null,
+    loot:['doubloon'],
+    combat:null,
+    special:null,
+  },
+  a2eb:{
+    steps:['The shrine is half-swallowed by jungle. Describe it: old stone, the name of the god scratched off every surface.',
+      'Players examine the carved tablet. Read the inscription aloud.',
+      'DC 13 Perception spots the pressure plate 3 feet in front of the chest.',
+      '<strong>If trap triggered:</strong> alarm bell rings (echoes through the whole ruin) + net drops from above. DC 12 DEX save or tangled 1 round.',
+      'DC 14 Investigation: hidden compartment behind a loose stone — <strong>Rum of the Depths + ritual scroll.</strong>',
+      'The ritual scroll: 3 steps, each takes 1 round, must be performed in sequence in the Vault.'],
+    ra:{en:'The shrine is old enough that the jungle has started winning. Vines thread through carved stone, patient as centuries. The god it honours has no name — someone took great care to remove it, scraping every surface. What remains is a figure: crowned, oceanic, arms spread wide. Below, a carved tablet. The inscription reads: THE KRAKEN WAS NOT SUMMONED. IT WAS CHAINED. BREAK THE CHAIN, NOT THE KRAKEN.',
+      sl:'Svetišče je dovolj staro, da džungla začenja zmagovati. Trte prepletajo klesani kamen, potrpežljive kot stoletja. Bog, ki mu je posvečeno, nima imena — nekdo si je vzel veliko truda, da ga je odstranil z vsake površine. Ostane le figura: kronana, oceanska, z razprtimi rokami. Spodaj je vrezan napis: KRAKEN NI BIL PRIKLICAN. BIL JE PRIKLENJEN. PRELOMI VERIGO, NE KRAKNA.'},
+    ra2:null,
+    checks:[
+      {dc:13,skill:'Perception',who:'anyone',result:'A pressure plate in the floor, 3 feet in front of the chest. Slightly different colour to the surrounding stone.'},
+      {dc:12,skill:'DEX save (if trap triggered)',who:'all adjacent',result:'Avoid the net. Failure = tangled, restrained for 1 round. The bell also echoes loudly through the entrance tunnels.'},
+      {dc:14,skill:'Investigation',who:'anyone examining the walls',result:'A loose stone behind the altar conceals a small compartment: one Rum of the Depths flask and a rolled scroll with three ritual steps.'},
+      {dc:14,skill:'Religion',who:'Mirnes auto (proficient)',result:'The name-removal is deliberate theological desecration — someone did not want this god found or remembered. The iconography matches sea-god cults that predate the current Amber Sea trade routes by centuries.'},
+    ],
+    npcs:[],
+    dialogue:[
+      {speaker:'GM narration',ctx:'reading the tablet inscription aloud',en:'"The Kraken was not summoned. It was chained. Break the chain, not the Kraken."',sl:'"Kraken ni bil priklican. Bil je priklenjen. Prelomi verigo, ne krakna."'},
+    ],
+    branching:null,
+    homebrew:null,
+    loot:['rum1'],
+    combat:null,
+    special:null,
+  },
+  a2ec:{
+    steps:['A man sits on a rock, facing the sea. He is completely still. His clothes are wrong — not dirty, just the wrong century.',
+      'He turns as players approach, as if he expected them. He seems perfectly fine.',
+      'He offers information freely. <strong>Roughly 60% of it is accurate.</strong> He is not lying — he is just imprecise about time.',
+      'He has drawn the island map in the sand. It resets every morning. Today\'s version is accurate.',
+      '<strong>Key information he gives freely:</strong> lever order (TIDE→STAR→MOON), don\'t touch the gold before talking to it, avoid Room 3 (or go to Room 3 — he\'s fuzzy on this).',
+      '<strong>If asked directly about the mural:</strong> long pause. "Oh. Yes. That\'s me." He has been waiting for someone to ask.'],
+    ra:{en:'He sits on a rock facing the sea, perfectly still. His clothes are wrong — not dirty, not torn, just the wrong era. The style of a different century, preserved as if time had simply not gotten around to him yet. He turns as you approach, as if he expected you. He smiles. "Ah," he says. "Someone finally made it."',
+      sl:'Sedi na skali z obrazom proti morju, povsem miren. Njegova oblačila so napačna — ne umazana, ne strgana, le iz napačnega obdobja. Zasuk, ko se jim približate, kot da vas je pričakoval. Nasmehne se. "Ah," pravi. "Nekdo je navsezadnje prispel."'},
+    ra2:null,
+    checks:[
+      {dc:12,skill:'Insight',who:'anyone',result:'Something is wrong with him beyond eccentricity. He has the eyes of someone very old. Not frightening — patient. He has been here for a very long time and he knows it.'},
+      {dc:14,skill:'History',who:'Zvonko auto',result:'His clothes match maritime fashion from approximately 200 years ago. Not a costume. The fabric is correct. The stitching is correct. This man dressed himself 200 years ago and has not changed since.'},
+      {dc:18,skill:'Perception',who:'anyone who looks carefully',result:'His shadow falls at the wrong angle for the time of day.'},
+    ],
+    npcs:['prospero'],
+    dialogue:[
+      {speaker:'Prospero Finch',ctx:'on how long he\'s been here',en:'"Three days or forty years. It\'s difficult to say. The island doesn\'t keep good time. Neither do I, anymore."',sl:'"Tri dni ali štirideset let. Težko reči. Otok ne drži dobrega časa. Jaz tudi ne, več."'},
+      {speaker:'Prospero Finch',ctx:'advice about the vault',en:'"Don\'t touch the gold before you talk to it. The gold, I mean. It doesn\'t like being grabbed without consent. Very rude. Also — avoid the second room. No, wait — definitely go to the second room. There\'s a chest. Or a trap. One of those."',sl:'"Ne dotikajte se zlata, preden se z njim pogovorite. Zlatom mislim. Ne mara biti zgrabljeno brez dovoljenja. Zelo nevljudno."'},
+      {speaker:'Prospero Finch',ctx:'if asked directly: Are you in the mural?',en:'"..." *[very long pause. He looks at his hands.]* "Oh. Yes. That\'s me. I\'ve been waiting for someone to ask that. I wasn\'t sure anyone would notice."',sl:'"..." *[zelo dolga pavza. Pogleda svoje roke.]* "Oh. Da. To sem jaz. Čakal sem, da me nekdo vpraša to. Nisem bil prepričan, da bo kdo opazil."'},
+    ],
+    branching:[
+      {label:'Players ask about the mural directly',d:'He tells them everything — the ritual, the kraken\'s nature, the fact that it was enslaved not summoned. He has wanted to tell someone for 200 years. He is relieved. He looks slightly younger when he smiles.'},
+      {label:'Players leave without asking',d:'He waves cheerfully. He will still be on the rock when they come back out. He has been here for 200 years. He can wait a few more hours.'},
+    ],
+    homebrew:null,
+    loot:[],
+    combat:null,
+    special:null,
+  },
+  a2r1:{
+    steps:['The entrance is through a crack in the rock face at low tide. Torches fail here — magical suppression.',
+      'Waist-deep salt water. Cold. Moving deliberately. Read the description.',
+      'Three iron levers on the far wall: <strong>MOON, TIDE, STAR</strong> (corroded, barely readable).',
+      '<strong>Correct order: TIDE → STAR → MOON.</strong> The door opens.',
+      '<strong>Gerald\'s intel:</strong> if players have it, they know the order. Auto-pass.',
+      '<strong>Wrong order:</strong> water geyser from floor. DC 13 STR save or 2d6 bludgeoning + prone (in waist-deep water — this is undignified). Resets after 1 round.'],
+    ra:{en:'The water is waist-deep and cold and it moves with slow, deliberate purpose — as if it would prefer you weren\'t here. Whatever light you brought has failed. Magical suppression, or something older. The walls absorb it. On the far wall: three iron levers. Above each, barely readable through decades of salt and corrosion: MOON. TIDE. STAR.',
+      sl:'Voda sega do pasu in je mrzla in se premika s počasnim, premišljenim namenom — kot da bi rajši niste bili tukaj. Kar koli ste prinesli za svetlobo, je odpovedalo. Na nasprotni steni so trije železni vzvodi. Nad vsakim, komaj berljivo skozi desetletja soli in korozije: LUNA. PLIMA. ZVEZDA.'},
+    ra2:null,
+    checks:[
+      {dc:12,skill:'History',who:'Zvonko auto',result:'Recalls a fragment of the Sea Shanty of the Three Pulls: "First the tide that pulls you under / then the star to guide you through / last the moon to light the thunder / these three keys will see you to." TIDE → STAR → MOON.'},
+      {dc:13,skill:'STR save (wrong lever)',who:'anyone in the room',result:'Avoid the geyser. Failure = 2d6 bludgeoning + prone. In waist-deep water, prone means submerged. Mirnes in full plate: this is his natural environment now.'},
+      {dc:10,skill:'Arcana',who:'Vuk auto',result:'The magical suppression is localised and ancient — it predates any modern magical tradition. Whatever bound the Kraken also sealed this room.'},
+    ],
+    npcs:[],
+    dialogue:[
+      {speaker:'Zvonko',ctx:'if he succeeds the History check',en:'"Wait. Wait — I know this. There\'s a shanty. It goes — \'first the tide that pulls you under\'. TIDE first. Then STAR. Then MOON."',sl:'"Počakaj. Počakaj — to vem. Obstaja šanta. Gre takole — \'najprej plima, ki te potegne globlje\'. Najprej PLIMA. Potem ZVEZDA. Potem LUNA."'},
+      {speaker:'If wrong lever pulled',ctx:'GM narration',en:'The floor erupts. Cold salt water, vertical, powerful. The sound echoes through the entire dungeon.',sl:'Tla izbruhnenjo. Mrzla slana voda, navpično, silovito. Zvok odmeva skozi celotno podzemlje.'},
+    ],
+    branching:null,
+    homebrew:'<strong>Light suppression:</strong> Torches, lanterns, and Dancing Lights fail in this room. Magical light sources (Light cantrip, etc.) work at half radius. Darkvision works normally. Mirnes\'s Divine Sense works normally. Vuk\'s Devil\'s Sight works perfectly.',
+    loot:[],
+    combat:null,
+    special:null,
+  },
+  a2r2:{
+    steps:['Six murals on the walls, telling the story in sequence. Walk the players through them.',
+      '<strong>Panel 1:</strong> Pirates arriving, celebrating. <strong>Panel 2:</strong> The vault, gold grabbed. <strong>Panel 3:</strong> Hands turning gold. <strong>Panel 4:</strong> Something enormous rising. <strong>Panel 5:</strong> One figure escaping on a raft. <strong>Panel 6:</strong> The creature sleeping. The vault sealed.',
+      'DC 15 Perception: spot the pressure plate 3 feet in front of the chest.',
+      '<strong>Trap triggered:</strong> alarm bell (very loud) + ceiling net. DC 12 DEX save or restrained 1 round.',
+      'The chest contains: <strong>Boots of Confident Incompetence.</strong>',
+      '<strong>Sharp players:</strong> Panel 5\'s escaping pirate wears distinctive clothes. Someone they\'ve met wears the same clothes.'],
+    ra:{en:'The walls tell a story. Six panels, carved with care, paint still preserved by something that should not have survived this long. Panel one: pirates arriving, celebrating, arms full. Panel two: hands reaching into a vault, gold everywhere. Panel three: the hands, slowly, turning gold. Panel four: something enormous, rising from below. Panel five: one figure running to a small raft, alone. Panel six: the creature, sleeping. The vault sealed. The gold still inside. The story ended the same way for everyone except the one who ran.',
+      sl:'Stene pripovedujejo zgodbo. Šest plošč, izklesanih s skrbnostjo, barva še vedno ohranjena z nečim, kar ne bi smelo preživeti tako dolgo. Plošča ena: pirati prispejo, slavijo, polni rok. Plošča dve: roke segajo v trezor, povsod zlato. Plošča tri: roke se počasi obarvajo v zlato. Plošča štiri: nekaj ogromnega se dviga od spodaj. Plošča pet: ena postava teče k majhnemu splavu, sama. Plošča šest: bitje spi. Trezor zapečaten. Zlato še vedno znotraj.'},
+    ra2:null,
+    checks:[
+      {dc:15,skill:'Perception',who:'anyone',result:'A pressure plate in the floor, 3 feet from the chest. The stone is fractionally different in colour.'},
+      {dc:12,skill:'DEX save (trap)',who:'anyone adjacent to the chest',result:'Avoid the net. Failure = restrained. The alarm bell is very loud and echoes for approximately 30 seconds.'},
+      {dc:12,skill:'Investigation (Mural 5)',who:'anyone who examines the figure closely',result:'The figure in Panel 5 — the one who escaped — is wearing very specific, distinctive clothes. Clothes you have seen recently. On a man sitting on a rock.'},
+      {dc:14,skill:'Arcana (Mural 3)',who:'anyone',result:'The gilding isn\'t a killing curse — it\'s a transformation. The gold is absorbing the people, not destroying them. Doña Sangrienta\'s ring is doing the same thing.'},
+    ],
+    npcs:['prospero'],
+    dialogue:[
+      {speaker:'Anyone examining Mural 5',ctx:'putting it together',en:'"That\'s... that\'s Prospero. Those are his clothes. That\'s him on the raft. He was here 200 years ago. He survived this."',sl:'"To je... to je Prospero. To so njegova oblačila. To je on na splavu. Bil je tukaj pred 200 leti. Preživel je to."'},
+    ],
+    branching:null,
+    homebrew:null,
+    loot:['boots'],
+    combat:null,
+    special:null,
+  },
+  a2r3:{
+    steps:['The pool in the centre of the room is still. Too still.',
+      'The Water Weird rises. Two Giant Crabs flank the pool. They have been waiting.',
+      'Read the Water Weird\'s warning speech.',
+      '<strong>Option 1 — Negotiate (show ritual tablet):</strong> Water Weird immediately stands down. Awards Compass of Questionable Directions.',
+      '<strong>Option 2 — Negotiate (no tablet):</strong> DC 14 Persuasion. Partial success — it tells them "a rite exists" but won\'t stand down fully. -1 round of combat before it attacks.',
+      '<strong>Option 3 — Fight:</strong> Water Weird + 2 Giant Crabs. Full encounter.',
+      '<strong>Option 4 — Creative:</strong> Any genuinely clever solution at GM discretion. The Water Weird respects ingenuity.'],
+    ra:{en:'The water in the pool has been still since you entered. Then it rises. Not water behaving like water — water behaving like something else wearing water. It shapes itself upward, finding a form just human enough to be unsettling, just inhuman enough to be wrong. Two crabs, enormous and patient, flank the pool on either side. They have been here for a very long time. They are used to waiting.',
+      sl:'Voda v bazenu je bila mirna, odkar ste vstopili. Potem se dvigne. Ne voda, ki se obnaša kot voda — voda, ki se obnaša kot nekaj drugega, oblečena v vodo. Oblikuje se navzgor, najde obliko, ki je ravno dovolj človeška, da je vznemirljiva, ravno dovolj nečloveška, da je napačna.'},
+    ra2:null,
+    checks:[
+      {dc:14,skill:'Arcana',who:'Vuk auto',result:'A Water Weird — bound elemental, not inherently evil. It is compelled to guard this passage. It cannot choose to leave. It is doing what it was made to do.'},
+      {dc:10,skill:'Insight',who:'anyone',result:'The Water Weird is not angry. It is tired. There is exhaustion in how it holds itself.'},
+      {dc:14,skill:'Persuasion (no tablet)',who:'Mirnes best (+6)',result:'Partial success. It acknowledges "a rite exists that would release you from our obligation to fight." It will not stand down, but it delays 1 round.'},
+    ],
+    npcs:['waterww','gcrab'],
+    dialogue:[
+      {speaker:'Water Weird',ctx:'its warning — read aloud',en:'"Turn back. The treasure is not yours. The treasure is not anyone\'s. It belongs to the chain. Leave, and live."',sl:'"Obrnite se. Zaklad ni vaš. Zaklad ni nikogar. Pripada verigam. Odidite in živite."'},
+      {speaker:'Water Weird',ctx:'if ritual tablet is shown — a long pause, then',en:'"You know the rite." *[pause]* "You may be different. Probably not." *[it hands the Compass to whoever held out the tablet]* "Try not to disappoint me."',sl:'"Poznate obred." *[pavza]* "Morda ste drugačni. Verjetno ne." *[poda kompas]* "Poskusite me ne razočarati."'},
+      {speaker:'After combat victory',ctx:'GM narration',en:'The water disperses. The crabs, freed from whatever bound them here, scatter into the tunnels. They are not related to Gerald. This is important to Gerald.',sl:'Voda se razprši. Raki, osvobojeni tistega, kar jih je vezalo sem, se razkropijo po hodnikih. Niso v sorodu z Geraldom. To je Geraldu pomembno.'},
+    ],
+    branching:[
+      {label:'Negotiated (tablet shown)',d:'Water Weird stands down. Awards Compass of Questionable Directions. The crabs wander off peacefully. Passage opens.'},
+      {label:'Negotiated (no tablet, partial)',d:'Water Weird attacks but is conflicted. It has disadvantage on its first attack. After 3 rounds, if still standing, it can be persuaded again at DC 10.'},
+      {label:'Fight',d:'Full encounter. Water Weird (58HP), Giant Crabs ×2 (13HP). When Weird reaches 0HP, it disperses. Crabs scatter.'},
+    ],
+    homebrew:null,
+    loot:['compass'],
+    combat:[{id:'waterww',count:1,hp:58},{id:'gcrab',count:2,hp:13}],
+    special:null,
+  },
+  a2r4:{
+    steps:['The door opens. Read the vault description slowly. Give players a moment.',
+      'Do not rush this. Let them look. Let them decide.',
+      '<strong>The moment anyone touches gold</strong> — even one coin — read the trigger description.',
+      'The water drains. The trembling begins. Transition to Scene 6.',
+      'Track the Curse of Gilded Greed below — if anyone pockets gold before the Kraken is resolved.'],
+    ra:{en:'The door opens and the smell hits you first — old gold and salt and something electric. Then the light: the entire room glows. Coins. Jewels. Weapons set with gems. Armour that hasn\'t rusted. Chests stacked to the ceiling. It is magnificent. It is ridiculous. It is absolutely, definitely cursed.',
+      sl:'Vrata se odprejo in vas najprej zadane vonj — staro zlato, sol in nekaj naelektrenega. Nato svetloba: vsa soba sveti. Kovanci. Dragulji. Orožja posuta z dragimi kamni. Oklep, ki ni zarjaval. Zaboji do stropa. Veličastno je. Absurdno je. Absolutno, zagotovo prekleto je.'},
+    ra2:{en:'The gold is warm. Oddly warm. The water drains from the floor cracks with a deep sucking sound. Then comes the trembling. Deep, rhythmic. Like something breathing. Something very large. Something very annoyed.',
+      sl:'Zlato je toplo. Nenavadno toplo. Voda odteka skozi razpoke tal z globokim srkajoče zvokom. Nato pride tresljaj. Globok, ritmičen. Kot dihanje. Nečesa zelo velikega. Nečesa zelo razdraženega.'},
+    checks:[
+      {dc:14,skill:'Arcana / Religion',who:'Vuk or Mirnes auto',result:'The vault itself is part of the binding. Touching the gold is not theft — it is a trigger. The kraken was chained to guard it. Every touch has woken it.'},
+      {dc:15,skill:'Perception',who:'anyone who actively looks around',result:'One locked alcove in the far corner is separate from the main hoard — different stone, different lock, colder to the touch. This is the Path 1 reward alcove.'},
+      {dc:18,skill:'Investigation (above door)',who:'anyone who looks up',result:'A faint inscription above the door reads: "Wake me only if you mean to free me."'},
+    ],
+    npcs:[],
+    dialogue:[
+      {speaker:'The room',ctx:'GM narration after first touch',en:'"The gold is warm. Oddly warm."',sl:'"Zlato je toplo. Nenavadno toplo."'},
+    ],
+    branching:null,
+    homebrew:'<strong>Curse of Gilded Greed:</strong> Any player who pockets vault gold before the Kraken is resolved: at the start of each combat, DC 13 WIS save or spend first action grabbing any visible shiny object. A finger begins to gold. Lifted by Remove Curse or resolving the Kraken encounter (any path).',
+    loot:[],
+    combat:null,
+    special:'curse',
+  },
+  a3s6:{
+    steps:['The Kraken bursts through the floor. The entire temple structure is now questionable.',
+      '<strong>DO NOT ATTACK IMMEDIATELY.</strong> It rants. It monologues. This is important RP time. Let it go for 2–3 full exchanges.',
+      'After the monologue: present the three paths clearly. Players choose.',
+      '<strong>Path 1 — Give It Back:</strong> Return gold, apologise. Kraken grumbles back to sleep. Reward from locked alcove.',
+      '<strong>Path 2 — Break the Curse:</strong> 3-round ritual. Kraken dissolves in relief. Full hoard, un-cursed.',
+      '<strong>Path 3 — Fight:</strong> HP 180, AC 18. Heart mechanic: 3 targeted hits = fight ends. See tracker below.'],
+    ra:{en:'It comes from below. The floor shatters first, then the walls crack, then the ceiling of the room above collapses somewhere else entirely. It is enormous. It is golden — gilded hide, coral-encrusted tentacles, barnacles that have had two hundred years to establish themselves. Its eyes glow deep amber. It is not looking at you with hunger. It is looking at you with the specific expression of someone who has been woken up for the third time this week.',
+      sl:'Pride iz globin. Najprej se tla razbijejo, nato razpokajo stene, nato se strop zgornje sobe zruši nekam povsem drugam. Je ogromen. Je zlat — pozlačena koža, koralni lovke, barnakli, ki so imeli dvesto let časa, da se naselijo. Njegove oči žarijo v globokem jantarnem sijaju. Ne gleda vas s pohlepom. Gleda vas z določenim izrazom nekoga, ki so ga zbudili že tretjič ta teden.'},
+    ra2:null,
+    checks:[
+      {dc:14,skill:'Insight',who:'anyone',result:'It is not going to attack immediately. It is venting. Give it a moment. It has been alone for 200 years and it has complaints.'},
+      {dc:12,skill:'History',who:'Zvonko auto',result:'The amber glow in its chest cavity — that is the binding. The chain. The thing that keeps it here. If that were to be disrupted...'},
+      {dc:14,skill:'Arcana',who:'Vuk auto',result:'The ritual scroll from the shrine would work here. Right now. The kraken\'s binding is visible and accessible.'},
+    ],
+    npcs:['kraken'],
+    dialogue:[
+      {speaker:'The Gilded Kraken',ctx:'opening monologue — read this out loud',en:'"Again. AGAIN they come. Two centuries of sleep and AGAIN someone touches the gold. Do you have any idea how EXHAUSTING this is? No. You don\'t. You\'re awake. All the time. Must be nice."',sl:'"Spet. SPET prihajajo. Dve stoletji spanja in SPET nekdo se dotakne zlata. Ali imate pojma, kako NAPORNO je to? Ne. Nimate. Vi ste budni. Ves čas. Gotovo je lepo."'},
+      {speaker:'The Gilded Kraken',ctx:'if players try to talk to it',en:'"Oh, now you want to TALK. Now. After two hundred years of nobody talking to me and then someone touching my gold — NOW you want a conversation."',sl:'"Oh, zdaj pa hočete GOVORITI. Zdaj. Po dvesto letih, ko se nihče ni pogovarjal z mano, in potem nekdo se dotakne mojega zlata — ZDAJ hočete pogovor."'},
+      {speaker:'The Gilded Kraken',ctx:'Path 2 resolution — final words, as it dissolves',en:'"I didn\'t even WANT this job. I was napping."',sl:'"Tega dela sploh NISEM hotel. Dremuckati sem."'},
+    ],
+    branching:[
+      {label:'Path 1 — Give It Back',d:'Return all gold, apologise. Kraken grumbles, returns to vault, goes back to sleep. Unlocks the alcove: Golden Hook, 1× Rum of Depths each, 200gp per player.'},
+      {label:'Path 2 — Break the Curse (3-step ritual)',d:'3 rounds, 1 action each. Use ritual tracker below. Kraken dissolves in relief. Full hoard, un-cursed. Doña\'s ring crumbles. Best outcome.'},
+      {label:'Path 3 — Fight',d:'HP 180, AC 18. 3 legendary actions/round. Amber heart: 3 targeted hits (announce + DC 18) = 1-round stun each. Three hits ends fight. Same resolution as Path 2.'},
+    ],
+    homebrew:'<strong>Heart Mechanic:</strong> Player must announce they\'re targeting the heart BEFORE rolling. Make a DC 18 attack roll or offensive spell targeting the heart specifically. Hit → Kraken stunned 1 round. <strong>Three successful hits = fight ends</strong> (same as Path 2 outcome).<br><br><strong>Legendary Actions (3/round, at end of other\'s turn):</strong> Tentacle Sweep +9 / 2d10+6 / DC16 STR grapple — Ink Jet (blind one creature, WIS DC 14 or frightened 1rnd) — Shift (moves 20ft, no AoO).',
+    loot:['hook','rum2','rum3'],
+    combat:[{id:'kraken',count:1,hp:180}],
+    special:'ritual',
+  },
+  a3s7:{
+    steps:['The Crimson Revenge appears offshore. Doña rows in with a few crew.',
+      'Her reaction depends on Act 1 outcome — see branching below.',
+      'If the curse broke: her ring crumbles to gold dust that drifts into the water. She watches it go.',
+      'Barnacle Pete is already cooking something. It smells of salt and regret. Everyone eats it anyway.',
+      'One-Eye Giulia has written a poem about what just happened. It is genuinely good. She refuses to admit this.',
+      '<strong>The coin temptation:</strong> someone will try to keep a cursed gold coin "just one." GM decides the consequences. They are comedic.'],
+    ra:{en:'The smoke — or the light, or the sound — brings a ship to the bay. The Crimson Revenge, anchored offshore. A rowing boat. Doña Sangrienta in it, watching the island as she approaches. She looks exhausted. She looks like someone who has been carrying something heavy for a very long time, and is trying to remember what it felt like before.',
+      sl:'Dim — ali svetloba, ali zvok — pripelje ladjo v zaliv. Krvava Maščevanja, zasidrana pred obalo. Čoln na vesla. Doña Sangrienta v njem, ki opazuje otok med prihodom. Zgleda izčrpana. Zgleda kot nekdo, ki dolgo nosi nekaj težkega in poskuša priklicati v spomin, kako je bilo prej.'},
+    ra2:null,
+    checks:[
+      {dc:12,skill:'Insight (watching Doña)',who:'anyone',result:'Whatever she expected to find here — alive, dead, cursed, uncursed — she found something she didn\'t expect. She is recalibrating.'},
+      {dc:10,skill:'Perception (her hand)',who:'anyone',result:'The ring is gone. Or rather: there is fine gold dust on her fingers, drifting in the sea breeze. She has not looked at it yet.'},
+    ],
+    npcs:['dona'],
+    dialogue:[
+      {speaker:'Doña Sangrienta',ctx:'Outcome A — seeing players alive after expecting them dead',en:'"Huh." *[long pause, watching the dust drift from her finger]* "I didn\'t think that was possible." *[another pause]* "What do I owe you?"',sl:'"Hmm." *[dolga pavza, opazuje prah, ki drsi z njenega prsta]* "Mislila nisem, da je to mogoče." *[še ena pavza]* "Kaj sem vam dolžna?"'},
+      {speaker:'One-Eye Giulia',ctx:'if asked to share the poem she\'s clearly written',en:'"It\'s nothing. Throw it away. Don\'t read it." *[she has already made three copies]* *[it is very good]*',sl:'"Nič je. Vrzite stran. Ne berite." *[že je naredila tri izvode]* *[je zelo dobro]*'},
+      {speaker:'Barnacle Pete',ctx:'serving dinner in the aftermath',en:'"I made something special. It has the texture of a difficult decision. And some of the... the kelp." *[nobody knows what the kelp is doing there]* "It\'s good for you."',sl:'"Naredil sem nekaj posebnega. Ima teksturo težke odločitve. In malo tistih... tistih alg." *[nihče ne ve, kaj alge tam počnejo]* "Dobro je za vas."'},
+    ],
+    branching:[
+      {label:'Outcome A — She was Hostile (Act 1)',d:'"I didn\'t think that was possible." She owes them nothing — but the weight she\'s been carrying for years is gone. She may become something complicated. She will not say thank you yet.'},
+      {label:'Outcome B — She was Allied (Act 1)',d:'"I told you we\'d see this through." She owes them a debt and she knows it. She says this plainly. What that means in the Amber Sea is up to the players.'},
+    ],
+    homebrew:null,
+    loot:[],
+    combat:null,
+    special:null,
+  },
+};
+// ══ GM CHARS ══
+const GM_CHARS=[
+  {idx:0,emoji:'🎩',name:'Marin "Tri Puta"',full:'Marin "Tri Puta" Vukasović',cls:'Fighter 5 · Battle Master',maxHp:44,ac:16,init:'+2',passPerc:12,spellSave:null,profSaves:'STR +5, CON +4',darkvision:false,
+    features:['Extra Attack','Action Surge 1/SR','Second Wind 1d10+5 (BA, 1/SR)','Battle Master: Riposte, Menacing Atk, Sweeping Atk · SD: d8 ×4'],
+    weapons:[{n:'Rapier',h:'+5',d:'1d8+5'},{n:'Flintlock',h:'+4',d:'1d6+2'},{n:'Dagger',h:'+5',d:'1d4+3'}]},
+  {idx:1,emoji:'🔱',name:'Vuk "Bledi"',full:'Vuk "Bledi" Senković',cls:'Warlock 5 · GOO · Pact Blade',maxHp:38,ac:13,init:'+2',passPerc:13,spellSave:'14',profSaves:'WIS +3, CHA +6',darkvision:'120ft',
+    features:['Eldritch Blast 2 beams +6/1d10+4','Warlock Slots: 2×Lvl3 (Short Rest)','Devil\'s Sight: darkness 120ft','Fire Resistance','Hex: +1d6 necrotic + DisAdv checks'],
+    weapons:[{n:'Trident (Pact)',h:'+6',d:'1d6+4'},{n:'Eldritch Blast',h:'+6',d:'1d10+4 ×2'}]},
+  {idx:2,emoji:'🔪',name:'Pero "Prsti"',full:'Pero "Prsti" Babić',cls:'Rogue 5 · Thief',maxHp:33,ac:15,init:'+4',passPerc:18,spellSave:null,profSaves:'DEX +6, INT +4',darkvision:false,
+    features:['Sneak Attack +3d6','Cunning Action: Dash/Disengage/Hide','Uncanny Dodge (Reaction)','Evasion: DEX save fail=half','Fast Hands: BA Use Object','Halfling Lucky: reroll nat 1s'],
+    weapons:[{n:'Shortsword',h:'+6',d:'1d6+4'},{n:'Dagger ×4',h:'+6',d:'1d4+4'},{n:'Flintlock',h:'+6',d:'1d6+4'}]},
+  {idx:3,emoji:'🎵',name:'Zvonko "Val"',full:'Zvonko "Val" Štimac',cls:'Bard 5 · College of Valor',maxHp:33,ac:15,init:'+2',passPerc:15,spellSave:'14',profSaves:'DEX +4, CHA +6',darkvision:'60ft',
+    features:['Extra Attack','Bardic Inspiration d8 ×4 (Short Rest)','Combat Inspiration: add die to AC or dmg','Healing Word 1d4+4 BA 60ft','Jack of All Trades: +1 unproficient'],
+    weapons:[{n:'Rapier',h:'+4',d:'1d8+2'},{n:'Flintlock',h:'+4',d:'1d6+2'},{n:'Vicious Mockery',h:'DC14 WIS',d:'1d4 psy'}]},
+  {idx:4,emoji:'🎣',name:'Bogdan "Pijani"',full:'Bogdan "Pijani" Ribič',cls:'Monk 5 · Drunken Master',maxHp:38,ac:16,init:'+3',passPerc:16,spellSave:null,profSaves:'STR +4, DEX +6',darkvision:'60ft',
+    features:['Extra Attack','Martial Arts d6: DEX + bonus unarmed (BA)','Ki ×5 (SR): Flurry+Disengage+10ft / Patient Defense / Step of Wind','Stunning Strike 1Ki DC14 CON','Dutch Courage mechanic','Dwarven Resilience: Adv/Resist Poison'],
+    weapons:[{n:'"Vesna" (Pole)',h:'+6',d:'1d8+3'},{n:'Unarmed',h:'+6',d:'1d6+3'}]},
+  {idx:5,emoji:'⚔️',name:'Mirnes "Vitez"',full:'Mirnes "Vitez" Selimović',cls:'Paladin 5 · Oath of Vengeance',maxHp:44,ac:20,init:'+0',passPerc:11,spellSave:'14',profSaves:'WIS +4, CHA +6',darkvision:false,
+    features:['Extra Attack','Divine Smite: +2d8(1st)/+3d8(2nd) necrotic on hit','Lay on Hands: 25 HP pool','Vow of Enmity: BA Adv 1 target 1min (1/SR)','Abjure Enemy: Action 60ft DC14 WIS Frightened+spd0 1min','Hold Person: auto-crit from adjacent'],
+    weapons:[{n:'Longsword',h:'+7',d:'1d8+6'},{n:'Javelin',h:'+7',d:'1d6+4'},{n:'Divine Smite',h:'on hit',d:'2d8 necrotic'}]},
+];
+// ══ NPCS ══
+const NPCS=[
+  {id:'dona',emoji:'⚔️',name:'Doña Sangrienta',role:'Captain · Crimson Revenge',cr:'5',ac:15,acNote:'leather+shield',hp:52,speed:'30ft',stats:{str:14,dex:16,con:14,int:12,wis:12,cha:16},saves:'DEX +5, CHA +5',skills:'Acrobatics +5, Perception +3',
+    actions:[{n:'Rapier',d:'<strong>+6</strong> · 1d8+4 piercing · Finesse'},{n:'Hand Crossbow',d:'<strong>+6</strong> · 1d6+4 · 30/120ft'},{n:'Sneak Attack +4d6',d:'once/turn, advantage or ally within 5ft'}],
+    bonusActions:[{n:'Cunning Action',d:'Dash, Disengage, or Hide'}],reactions:[{n:'Uncanny Dodge',d:'Halve damage from one visible attack'}],
+    personality:'Fierce, prideful, not evil — desperate. Her crew is her family. Wants the curse broken. Will not ask for help.',
+    secret:'A gold ring is fused to her finger. Her skin is slowly gilding outward from it.',
+    outcomes:[{label:'A — Escaped',d:'Arrives Act 3. Ring crumbles if curse breaks. "I didn\'t think that was possible."'},{label:'B — Captured/Allied',d:'Reveals she looted the vault once. Ancestor is Mural 5. Ring crumbles. Owes a debt.'}]},
+  {id:'pete',emoji:'🍳',name:'Barnacle Pete',role:'Ship\'s Cook',ac:10,hp:10,speed:'25ft',stats:{str:14,dex:8,con:12,int:8,wis:10,cha:12},saves:'—',skills:'Cook\'s Tools +4',
+    actions:[{n:'Frying Pan',d:'+4 · 1d6+2 bludgeoning'},{n:'Pot Throw (panics)',d:'+2 · 1d6 · range 20ft'}],
+    bonusActions:[],reactions:[],personality:'Dwarf. Terrible cook. Atrocious food. Enormous loyalty.',secret:'His food has never actually killed anyone. This is impressive.',outcomes:[]},
+  {id:'giulia',emoji:'📜',name:'One-Eye Giulia',role:'First Mate',ac:12,hp:22,speed:'30ft',stats:{str:12,dex:14,con:12,int:14,wis:14,cha:12},saves:'DEX +3, WIS +3',skills:'Athletics +3, Perception +4',
+    actions:[{n:'Rapier',d:'+4 · 1d8+2'},{n:'Flintlock',d:'+4 · 1d6+2 · 30/90ft'}],
+    bonusActions:[],reactions:[],personality:'Human. No-nonsense. Runs the ship. Writes secret poetry. It is very good. She would rather face the Kraken.',secret:'Three copies of the poem. She will deny all of them.',outcomes:[]},
+  {id:'gerald',emoji:'🦀',name:'Gerald',role:'Crab General · Beach',ac:15,hp:13,speed:'30ft/swim',stats:{str:13,dex:15,con:11,int:1,wis:9,cha:3},saves:'—',skills:'—',
+    actions:[{n:'Claw ×2',d:'+3 · 1d6+1 · grapple DC 11 STR'}],
+    bonusActions:[],reactions:[],personality:'47 years drilling. Has opinions about gulls. Believes seagulls are conducting espionage for a rival faction.',secret:'Gerald is the most organised entity on the island.',
+    outcomes:[{label:'Gull Situation resolved',d:'Gives TIDE→STAR→MOON + safe path + 80gp pearls. Very professional.'}]},
+  {id:'prospero',emoji:'👴',name:'Prospero Finch',role:'The Marooned Sailor',ac:10,hp:25,speed:'30ft',stats:{str:10,dex:10,con:14,int:16,wis:12,cha:14},saves:'—',skills:'History +7',
+    actions:[{n:'Dagger',d:'+1 · 1d4−1 (he really doesn\'t want to fight)'}],
+    bonusActions:[],reactions:[],personality:'"Three days or forty years." 60% accurate. Draws island map in sand (resets daily).',secret:'IS the pirate in Mural 5. 200 years old. Has been waiting for someone to break the curse. Will not volunteer this. Wait to be asked.',
+    outcomes:[{label:'Asked about the mural directly',d:'"Oh. Yes. That\'s me." Tells them everything about the ritual.'}]},
+  {id:'waterww',emoji:'💧',name:'Water Weird',role:'Room 3 Guardian',cr:'3',ac:13,hp:58,speed:'swim 60ft',stats:{str:17,dex:16,con:13,int:11,wis:10,cha:10},saves:'—',skills:'—',
+    actions:[{n:'Constrict',d:'+5 · 3d8+3 · grappled DC 13 STR · restrained while grappled'},{n:'Invisible in water',d:'Cannot be seen in water unless it attacks'},{n:'Immunities',d:'Poison, Psychic · Non-magical B/P/S'}],
+    bonusActions:[],reactions:[],personality:'Bound elemental. Not evil. Tired. Does what it was made to do.',secret:'Show the ritual tablet → immediately stands down. Awards Compass. Says "You may be different. Probably not."',
+    outcomes:[{label:'Negotiated (tablet)',d:'Stands down. Awards Compass. Offers passage.'},{label:'Defeated',d:'Disperses. Crabs scatter. Not Gerald\'s crabs. This matters to Gerald.'}]},
+  {id:'gcrab',emoji:'🦀',name:'Giant Crab ×2',role:'Room 3 · Not Gerald\'s',cr:'1/8',ac:15,hp:13,speed:'30ft/swim',stats:{str:13,dex:15,con:11,int:1,wis:9,cha:3},saves:'—',skills:'Stealth +4',
+    actions:[{n:'Claw',d:'+3 · 1d6+1 · grapple DC 11 STR'}],
+    bonusActions:[],reactions:[],personality:'Generic crabs. Not part of Gerald\'s unit. This distinction is important to Gerald.',secret:'',outcomes:[]},
+  {id:'pirate',emoji:'🏴‍☠️',name:'Generic Pirate ×6',role:'Crimson Revenge · CR 1/8',ac:12,hp:5,speed:'30ft',stats:{str:11,dex:12,con:11,int:10,wis:10,cha:10},saves:'—',skills:'—',
+    actions:[{n:'Scimitar',d:'+3 · 1d6+1'},{n:'Flintlock',d:'+3 · 1d8+1 · 30/90ft'}],
+    bonusActions:[],reactions:[],personality:'Doña\'s crew. Her family. They will fight for her.',secret:'',outcomes:[]},
+  {id:'veteran',emoji:'⚔️',name:'Pirate Veteran',role:'Crimson Revenge · CR 3',ac:17,hp:58,speed:'30ft',stats:{str:16,dex:13,con:14,int:10,wis:11,cha:10},saves:'STR +5, CON +4',skills:'Athletics +5',
+    actions:[{n:'Multiattack',d:'Two Scimitar attacks'},{n:'Scimitar ×2',d:'+5 · 1d6+3 each'},{n:'Heavy Crossbow',d:'+3 · 1d10+1 · 100/400ft'}],
+    bonusActions:[],reactions:[{n:'Parry',d:'+2 AC against one melee attack'}],personality:'The one who actually knows what they\'re doing.',secret:'',outcomes:[]},
+  {id:'kraken',emoji:'🐙',name:'The Gilded Kraken',role:'Act 3 · Boss',ac:18,hp:180,speed:'Swim 40ft',stats:{str:26,dex:13,con:20,int:15,wis:15,cha:18},saves:'STR +13, CON +10, WIS +7',skills:'Perception +7',
+    actions:[{n:'Tentacle Sweep',d:'+9 · 2d10+6 · 15ft · DC 16 STR grapple'},{n:'Crushing Embrace (Action)',d:'Grappled target: 4d8+6 · DC 17 STR restrained'},{n:'Golden Spit (Recharge 5–6)',d:'30ft cone · DC 16 DEX · 6d8 fire fail / half success'},{n:'Legendary Actions × 3/round',d:'Tentacle Sweep / Ink Jet (WIS DC14 frightened) / Shift (20ft no AoO)'}],
+    bonusActions:[],reactions:[],
+    personality:'Not evil. Ancient. Profoundly annoyed. 200 years of guarding without rest or company. LET IT MONOLOGUE.',
+    secret:'It did not want this job. It was napping. The ritual frees it. "I didn\'t even WANT this job. I was napping."',
+    outcomes:[{label:'Path 1 — Give It Back',d:'Golden Hook + Rum ×1 each + 200gp/player from locked alcove.'},{label:'Path 2 — Ritual (3 rounds)',d:'Full hoard un-cursed. Kraken dissolves in relief. Best outcome.'},{label:'Path 3 — Fight',d:'Heart: 3 targeted DC18 hits = stun each, 3 hits ends fight. Same as Path 2.'}]},
+];
+// ══ LOOT ══
+const LOOT=[
+  {id:'boots',code:'BOOTS',emoji:'🥾',name:'Boots of Confident Incompetence',type:'Wondrous',rarity:'Rare',cursed:true,desc:'Advantage on Persuasion when attempting something obviously terrible. Disadvantage on Insight — you genuinely cannot tell when a plan is bad.',fx:'ADV Persuasion (bad plans) · DisAdv Insight · Cannot remove without Remove Curse',se:{advantage:['persuasion'],disadvantage:['insight']}},
+  {id:'compass',code:'COMPASS',emoji:'🧭',name:'Compass of Questionable Directions',type:'Wondrous',rarity:'Uncommon',cursed:false,desc:'Points toward "the most interesting thing within 1 mile." The compass decides what is interesting. Yes/no oracle (75% accurate, extremely smug about the other 25%).',fx:'Points to most interesting thing 1mi · Yes/No oracle 75% accurate',se:{}},
+  {id:'rum1',code:'RUM1',emoji:'🍶',name:'Rum of the Depths',type:'Potion (Flask)',rarity:'Uncommon',cursed:false,desc:'d6: 1–2: 2d4+2 temp HP (feel invincible, not). 3–4: Misty Step, 10ft random direction. 5: Enlarge 1min. 6: Possessed by dead pirate (advice + pass out 1 round).',fx:'d6 random effect',se:{}},
+  {id:'rum2',code:'RUM2',emoji:'🍶',name:'Rum of the Depths',type:'Potion (Flask)',rarity:'Uncommon',cursed:false,desc:'d6: 1–2: 2d4+2 temp HP. 3–4: Misty Step random direction. 5: Enlarge 1min. 6: Possessed by dead pirate (advice + pass out).',fx:'d6 random effect',se:{}},
+  {id:'rum3',code:'RUM3',emoji:'🍶',name:'Rum of the Depths',type:'Potion (Flask)',rarity:'Uncommon',cursed:false,desc:'d6: 1–2: 2d4+2 temp HP. 3–4: Misty Step random direction. 5: Enlarge 1min. 6: Possessed by dead pirate (advice + pass out).',fx:'d6 random effect',se:{}},
+  {id:'hook',code:'HOOK',emoji:'🪝',name:'The Golden Hook',type:'Weapon (Flintlock)',rarity:'Rare',cursed:false,desc:'+1 magical flintlock. Grappling bolt 1/day: target Restrained DC 14 STR. Functions as grappling hook for climbing.',fx:'+1 attack and damage · Grappling bolt 1/day (Restrained DC 14 STR)',se:{weaponPatch:{targetId:'pistol',hitBonus:1,dmg:'1d6+3',name:'The Golden Hook ✦'}}},
+  {id:'grog',code:'GROG',emoji:'🍺',name:'Flask of Good Grog',type:'Consumable',rarity:'Common',cursed:false,desc:'Bogdan: +1 drink level. Others: 1d4 temp HP.',fx:'Bogdan: +1 drink level · Others: 1d4 temp HP',se:{}},
+  {id:'admiral',code:'ADMIRAL',emoji:'🥃',name:'Admiral\'s Reserve',type:'Consumable',rarity:'Uncommon',cursed:false,desc:'Bogdan: +2 drink levels in one sip (risky). Others: 2d4 temp HP + DisAdv WIS saves 1hr.',fx:'Bogdan: +2 drink levels · Others: 2d4 temp HP + DisAdv WIS 1hr',se:{}},
+  {id:'mystery',code:'MYSTERY',emoji:'🍾',name:'Mystery Bottle',type:'Consumable',rarity:'Common',cursed:false,desc:'Unlabelled. Roll on Rum of the Depths table. Or don\'t. Maybe it\'s vinegar.',fx:'Roll Rum of the Depths table (or GM decides)',se:{}},
+  {id:'scale',code:'SCALE',emoji:'🐚',name:'Mermaid\'s Scale',type:'Wondrous',rarity:'Uncommon',cursed:false,desc:'Advantage on Athletics (swim). While fully submerged: resistance to cold damage.',fx:'ADV Athletics (swim) · Resistance cold while submerged',se:{advantage:['athletics']}},
+  {id:'doubloon',code:'DOUBLOON',emoji:'🪙',name:'Lucky Doubloon',type:'Wondrous',rarity:'Common',cursed:false,desc:'Once per day: reroll any die after rolling, use either result. Always warm.',fx:'1/day: reroll any die, keep either result',se:{}},
+  {id:'coin',code:'COIN',emoji:'🥇',name:'Cursed Vault Coin',type:'Wondrous',rarity:'Common',cursed:true,desc:'Start of each combat: DC 13 WIS save or spend first action admiring the coin. Curse lifted when Kraken\'s curse is broken.',fx:'CURSED: combat start DC 13 WIS or lose first action',se:{}},
+  {id:'storm',code:'STORM',emoji:'⛈️',name:'Bottle of Captured Storm',type:'Consumable',rarity:'Uncommon',cursed:false,desc:'Throw 30ft: 10ft radius 1min. Creatures inside: DC 13 DEX or 2d6 lightning per round. One use.',fx:'10ft lightning zone · 2d6 lightning DC 13 DEX · 1 minute',se:{}},
+  {id:'eyepatch',code:'EYEPATCH',emoji:'🏴‍☠️',name:'Pirate\'s Eye Patch',type:'Wondrous',rarity:'Common',cursed:false,desc:'DisAdv Perception, Adv Stealth. Creatures cannot gain flanking-based advantage against you.',fx:'DisAdv Perception · ADV Stealth · No flanking advantage',se:{advantage:['stealth'],disadvantage:['perception']}},
+];
+// ══ STATE ══
+function defaultState(){
+  return{v:2,activeTab:'notes',notes:'',slOn:false,
+    scenes:SCENES.map(s=>({id:s.id,done:false})),
+    sceneNotes:{},
+    combat:{round:0,activeIdx:-1,combatants:[]},
+    loot:LOOT.map(it=>({id:it.id,assignedChar:-1,distributed:false})),
+    npcExpanded:{},cardExpanded:{},
+    shipCombat:{seahorse:50,revenge:60},
+    ritualSteps:[false,false,false],
+    curseTracker:[false,false,false,false,false,false],
+  };
+}
+let S;
+try{const r=localStorage.getItem('gk_gm');S=r?JSON.parse(r):defaultState();if(!S.v||S.v<2)S=defaultState();}catch(e){S=defaultState();}
+function save(){try{localStorage.setItem('gk_gm',JSON.stringify(S));}catch(e){}}
+function sceneState(id){return S.scenes.find(s=>s.id===id)||(S.scenes.push({id,done:false}),S.scenes[S.scenes.length-1]);}
+function lootState(id){return S.loot.find(l=>l.id===id)||(S.loot.push({id,assignedChar:-1,distributed:false}),S.loot[S.loot.length-1]);}
+// ══ TAB NAV ══
+function switchTab(tab){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>{if(b.getAttribute('onclick')?.includes("'"+tab+"'"))b.classList.add('active');});
+  S.activeTab=tab;save();
+  if(tab==='notes')renderNotes();
+  else if(tab==='combat')renderCombat();
+  else if(tab==='party')renderParty();
+  else if(tab==='npcs')renderNPCs();
+  else if(tab==='loot')renderLoot();
+}
+// ══ SCENE DETAIL PANEL ══
+let openSceneId=null;
+let spTouchX=0;
+function openScenePanel(id){
+  openSceneId=id;
+  renderScenePanel(id);
+  document.getElementById('scene-panel').classList.add('open');
+  document.getElementById('scene-panel').classList.toggle('sl-on',!!S.slOn);
+  document.getElementById('sl-toggle-btn').classList.toggle('active',!!S.slOn);
+}
+function closeScenePanel(){
+  document.getElementById('scene-panel').classList.remove('open');
+  openSceneId=null;
+  renderNotes();
+}
+function toggleSL(){
+  S.slOn=!S.slOn;save();
+  document.getElementById('scene-panel').classList.toggle('sl-on',S.slOn);
+  document.getElementById('sl-toggle-btn').classList.toggle('active',S.slOn);
+}
+function navigateScene(dir){
+  const idx=SCENES.findIndex(s=>s.id===openSceneId);
+  const next=idx+dir;
+  if(next<0||next>=SCENES.length)return;
+  openScenePanel(SCENES[next].id);
+}
+function toggleSceneFromPanel(){
+  const st=sceneState(openSceneId);
+  st.done=!st.done;save();
+  renderScenePanelFooter(openSceneId);
+  showToast(st.done?'✓ Scene marked done':'↩ Unmarked');
+}
+function spTouchStart(e){spTouchX=e.touches[0].clientX;}
+function spTouchEnd(e){const dx=e.changedTouches[0].clientX-spTouchX;if(Math.abs(dx)>60)navigateScene(dx<0?1:-1);}
+let sceneNoteTimers={};
+function saveSceneNote(id,val){
+  clearTimeout(sceneNoteTimers[id]);
+  sceneNoteTimers[id]=setTimeout(()=>{if(!S.sceneNotes)S.sceneNotes={};S.sceneNotes[id]=val;save();},400);
+}
+function renderScenePanelFooter(id){
+  const idx=SCENES.findIndex(s=>s.id===id);
+  const st=sceneState(id);
+  const prevBtn=document.getElementById('sp-prev');
+  const nextBtn=document.getElementById('sp-next');
+  const doneBtn=document.getElementById('sp-done-btn');
+  if(prevBtn)prevBtn.className='sp-nav-btn'+(idx===0?' disabled':'');
+  if(nextBtn)nextBtn.className='sp-nav-btn'+(idx===SCENES.length-1?' disabled':'');
+  if(doneBtn){doneBtn.textContent=st.done?'✓ Done':'Mark Done';doneBtn.className='sp-done-btn'+(st.done?' done':'');}
+}
+function renderScenePanel(id){
+  const scene=SCENES.find(s=>s.id===id);
+  const det=SD[id];
+  const st=sceneState(id);
+  const idx=SCENES.findIndex(s=>s.id===id);
+  const actLabels={1:'Act 1 — All Aboard the Chaos',2:'Act 2 — Isla Maldita',3:'Act 3 — The Kraken Problem'};
+  document.getElementById('sp-act-label').textContent=actLabels[scene.act];
+  document.getElementById('sp-title').textContent=scene.label;
+  renderScenePanelFooter(id);
+  if(!det){document.getElementById('sp-body').innerHTML='<p style="padding:1rem;font-family:var(--font-b);color:var(--parchment-dark);opacity:.6;font-style:italic">Detailed guide not yet available for this scene.</p>';return;}
+  let html='';
+  // Steps
+  if(det.steps?.length){
+    html+=`<div class="sp-section"><div class="sp-section-label">🗺 Steps</div><div class="steps-list">${det.steps.map((s,i)=>`<div class="step-row"><div class="step-num">${i+1}</div><div class="step-text">${s}</div></div>`).join('')}</div></div>`;
+  }
+  // Read Aloud
+  if(det.ra){
+    html+=`<div class="sp-section"><div class="sp-section-label">📢 Read Aloud</div>
+    <div class="read-aloud-box"><div class="ra-label">Atmosphere — read aloud</div>
+    <div class="ra-text">${det.ra.en}</div><div class="ra-text-sl">${det.ra.sl||det.ra.en}</div></div>
+    ${det.ra2?`<div class="read-aloud-box ra-box2"><div class="ra-label">After first trigger</div><div class="ra-text">${det.ra2.en}</div><div class="ra-text-sl">${det.ra2.sl||det.ra2.en}</div></div>`:''}
+    </div>`;
+  }
+  // Skill Checks
+  if(det.checks?.length){
+    html+=`<div class="sp-section"><div class="sp-section-label">🎲 Skill Checks</div><div class="check-list">
+    ${det.checks.map(c=>`<div class="check-box"><div class="check-dc">DC ${c.dc}</div><div class="check-body"><div class="check-skill">${c.skill} <span class="check-who">${c.who?'('+c.who+')':''}</span></div><div class="check-result">${c.result}</div></div></div>`).join('')}
+    </div></div>`;
+  }
+  // Key NPCs
+  if(det.npcs?.length){
+    html+=`<div class="sp-section"><div class="sp-section-label">🎭 Key NPCs</div><div class="npc-chips">
+    ${det.npcs.map(nid=>{const n=NPCS.find(x=>x.id===nid);if(!n)return'';return`<div class="npc-chip" onclick="showNPCMini('${nid}')"><span class="npc-chip-emoji">${n.emoji}</span><span class="npc-chip-name">${n.name}</span></div>`;}).join('')}
+    </div></div>`;
+  }
+  // Dialogue
+  if(det.dialogue?.length){
+    html+=`<div class="sp-section"><div class="sp-section-label">💬 Dialogue</div><div class="dialogue-list">
+    ${det.dialogue.map(d=>`<div class="dialogue-entry"><div class="dlg-speaker">${d.speaker}</div>${d.ctx?`<div class="dlg-context">${d.ctx}</div>`:''}
+    <div class="dlg-en">"${d.en}"</div>
+    <div class="dlg-sl">"${d.sl||d.en}"</div></div>`).join('')}
+    </div></div>`;
+  }
+  // Branching
+  if(det.branching?.length){
+    html+=`<div class="sp-section"><div class="sp-section-label">🔀 Branching Outcomes</div><div class="branch-list">
+    ${det.branching.map(b=>`<div class="branch-row"><div class="branch-label">${b.label}</div><div class="branch-text">${b.d}</div></div>`).join('')}
+    </div></div>`;
+  }
+  // Homebrew reminder
+  if(det.homebrew){
+    html+=`<div class="sp-section"><div class="sp-section-label">📖 Homebrew Reminder</div>
+    <div class="hb-box"><div class="hb-label">Rules in effect</div><div class="hb-text">${det.homebrew}</div></div></div>`;
+  }
+  // Special trackers
+  if(det.special==='ship'){
+    html+=`<div class="sp-section"><div class="sp-section-label">⚓ Ship Combat Tracker</div>${buildShipTracker()}</div>`;
+  }
+  if(det.special==='ritual'){
+    html+=`<div class="sp-section"><div class="sp-section-label">✨ 3-Step Ritual Tracker</div>${buildRitualTracker()}</div>`;
+  }
+  if(det.special==='curse'){
+    html+=`<div class="sp-section"><div class="sp-section-label">💛 Curse of Gilded Greed</div>${buildCurseTracker()}</div>`;
+  }
+  // Loot
+  if(det.loot?.length){
+    const lNames=det.loot.map(lid=>{const it=LOOT.find(x=>x.id===lid);return it?`${it.emoji} <strong>${it.name}</strong>`:'';}).filter(Boolean);
+    html+=`<div class="sp-section"><div class="sp-section-label">🎒 Available Loot</div>
+    <div style="background:rgba(201,146,42,.07);border:1px solid rgba(201,146,42,.22);border-radius:8px;padding:.45rem .6rem;font-family:var(--font-b);font-size:.8rem;color:var(--parchment-dark);line-height:1.7">${lNames.join('<br>')}</div></div>`;
+  }
+  // Start Combat
+  if(det.combat?.length){
+    html+=`<div class="sp-section"><button class="start-combat-btn" onclick="startCombatFromScene('${id}')">⚔️ Start Combat — Pre-fill Tracker</button></div>`;
+  }
+  // GM Notes
+  const noteVal=(S.sceneNotes&&S.sceneNotes[id])||'';
+  html+=`<div class="sp-section"><div class="sp-section-label">📝 GM Notes — this scene</div>
+  <textarea class="sp-notes-input" id="sp-notes-${id}" placeholder="Private notes for this scene…" oninput="saveSceneNote('${id}',this.value)">${noteVal}</textarea></div>`;
+  document.getElementById('sp-body').innerHTML=html;
+  document.getElementById('sp-body').scrollTop=0;
+}
+function startCombatFromScene(sceneId){
+  const det=SD[sceneId];if(!det?.combat)return;
+  det.combat.forEach(entry=>{
+    const npc=NPCS.find(n=>n.id===entry.id);if(!npc)return;
+    for(let i=0;i<(entry.count||1);i++){
+      const cid=entry.id+(entry.count>1?'_'+i:'')+'_'+Date.now();
+      if(!S.combat.combatants.find(c=>c.id===cid)){
+        S.combat.combatants.push({id:cid,name:npc.name+(entry.count>1?' '+(i+1):''),init:0,hp:entry.hp,maxHp:entry.hp,type:'npc'});
+      }
+    }
+  });
+  if(S.combat.round===0)S.combat.round=1;
+  save();closeScenePanel();switchTab('combat');
+  showToast('⚔️ Enemies added to tracker — set initiatives!');
+}
+// ══ SHIP TRACKER ══
+function buildShipTracker(){
+  const sh=S.shipCombat||{seahorse:50,revenge:60};
+  const shPct=Math.max(0,Math.min(100,sh.seahorse/50*100));
+  const rvPct=Math.max(0,Math.min(100,sh.revenge/60*100));
+  const shCol=shPct<=25?'#ef4444':shPct<=50?var_amber:var_sea;
+  return`<div class="ship-tracker">
+  <div class="ship-tracker-title">⚓ Hull Points</div>
+  <div class="ship-row">
+    <div class="ship-name">Pijani Morski Konj (Seahorse)</div>
+    <div class="ship-hp-display"><span class="ship-hp-val" id="sh-hp">${sh.seahorse}</span><span class="ship-hp-max"> / 50 HP</span></div>
+    <div class="ship-bar-wrap"><div class="ship-bar-fill" id="sh-bar" style="width:${shPct}%;background:${shPct<=25?'#ef4444':shPct<=50?'var(--amber)':'var(--sea-light)'}"></div></div>
+    <div class="ship-dmg-row">
+      <button class="ship-btn" onclick="applyShip('seahorse',-10)">−10</button>
+      <button class="ship-btn" onclick="applyShip('seahorse',-5)">−5</button>
+      <button class="ship-btn" onclick="applyShip('seahorse',-1)">−1</button>
+      <button class="ship-btn heal" onclick="applyShip('seahorse',5)">+5</button>
+    </div>
+  </div>
+  <div style="height:.4rem"></div>
+  <div class="ship-row">
+    <div class="ship-name">Krvava Maščevanja (Crimson Revenge)</div>
+    <div class="ship-hp-display"><span class="ship-hp-val" id="rv-hp">${sh.revenge}</span><span class="ship-hp-max"> / 60 HP</span></div>
+    <div class="ship-bar-wrap"><div class="ship-bar-fill" id="rv-bar" style="width:${rvPct}%;background:${rvPct<=25?'#ef4444':rvPct<=50?'var(--amber)':'#ef4444'}"></div></div>
+    <div class="ship-dmg-row">
+      <button class="ship-btn" onclick="applyShip('revenge',-10)">−10</button>
+      <button class="ship-btn" onclick="applyShip('revenge',-5)">−5</button>
+      <button class="ship-btn" onclick="applyShip('revenge',-1)">−1</button>
+      <button class="ship-btn heal" onclick="applyShip('revenge',5)">+5</button>
+    </div>
+  </div>
+  <button class="ship-reset-btn" onclick="resetShipCombat()">↺ Reset to full hull</button>
+  </div>`;
+}
+const var_amber='var(--amber)';const var_sea='var(--sea-light)';
+function applyShip(ship,delta){
+  if(!S.shipCombat)S.shipCombat={seahorse:50,revenge:60};
+  const max=ship==='seahorse'?50:60;
+  S.shipCombat[ship]=Math.max(0,Math.min(max,S.shipCombat[ship]+delta));
+  save();
+  const el=document.getElementById(ship==='seahorse'?'sh-hp':'rv-hp');
+  const bar=document.getElementById(ship==='seahorse'?'sh-bar':'rv-bar');
+  if(el)el.textContent=S.shipCombat[ship];
+  const pct=S.shipCombat[ship]/max*100;
+  if(bar){bar.style.width=pct+'%';bar.style.background=pct<=25?'#ef4444':pct<=50?'var(--amber)':'var(--sea-light)';}
+  if(S.shipCombat[ship]===0)showToast('💥 '+(ship==='seahorse'?'Seahorse':'Crimson Revenge')+' is SINKING! 3 rounds!');
+}
+function resetShipCombat(){S.shipCombat={seahorse:50,revenge:60};save();renderScenePanel(openSceneId);}
+// ══ RITUAL TRACKER ══
+const RITUAL_STEPS=['Step 1: Pour seawater on the golden heart while speaking the words from the scroll.',
+  'Step 2: Three participants each touch the heart simultaneously — one for each path not taken.',
+  'Step 3: Speak the Kraken\'s name aloud. (You must ask it. It will tell you. It has waited a long time to be asked.)'];
+function buildRitualTracker(){
+  return`<div class="ritual-tracker">
+  <div class="ritual-title">✨ 3-Step Ritual — 1 action each round</div>
+  <div class="ritual-steps">
+  ${RITUAL_STEPS.map((s,i)=>`<div class="ritual-step${S.ritualSteps[i]?' done':''}" onclick="toggleRitual(${i})">
+    <div class="rs-pip">${S.ritualSteps[i]?'✓':''}</div>
+    <div><div class="rs-num">Round ${i+1}</div><div class="rs-text">${s}</div></div>
+  </div>`).join('')}
+  </div></div>`;
+}
+function toggleRitual(i){S.ritualSteps[i]=!S.ritualSteps[i];save();const el=document.getElementById('sp-body');if(el&&openSceneId)renderScenePanel(openSceneId);
+  const done=S.ritualSteps.filter(Boolean).length;if(done===3)showToast('✨ Ritual complete! The chain breaks!');}
+// ══ CURSE TRACKER ══
+function buildCurseTracker(){
+  return`<div class="curse-tracker">
+  <div class="curse-title">💛 Curse of Gilded Greed</div>
+  <div class="curse-subtitle">Touch vault gold before resolving the Kraken → DC 13 WIS at combat start or lose first action</div>
+  <div class="curse-grid">
+  ${GM_CHARS.map((c,i)=>`<div class="curse-btn${S.curseTracker[i]?' cursed':''}" onclick="toggleCurse(${i})">
+    <span class="ce">${c.emoji}</span>${c.name.split(' ')[0]}${S.curseTracker[i]?'<br>💛 CURSED':''}
+  </div>`).join('')}
+  </div>
+  <button class="curse-reset-btn" onclick="resetCurse()">↺ Clear all curses (curse resolved)</button>
+  </div>`;
+}
+function toggleCurse(i){S.curseTracker[i]=!S.curseTracker[i];save();if(openSceneId)renderScenePanel(openSceneId);
+  showToast(S.curseTracker[i]?GM_CHARS[i].name.split(' ')[0]+' is CURSED 💛':'Curse lifted for '+GM_CHARS[i].name.split(' ')[0]);}
+function resetCurse(){S.curseTracker=[false,false,false,false,false,false];save();if(openSceneId)renderScenePanel(openSceneId);}
+// ══ NPC MINI CARD ══
+function showNPCMini(id){
+  const npc=NPCS.find(n=>n.id===id);if(!npc)return;
+  const actions=npc.actions.slice(0,3).map(a=>`<div class="nmc-action"><div class="nmc-an">${a.n}</div><div class="nmc-ad">${a.d}</div></div>`).join('');
+  document.getElementById('nmc-content').innerHTML=`
+    <div class="nmc-head"><div class="nmc-emoji">${npc.emoji}</div><div><div class="nmc-name">${npc.name}</div><div class="nmc-role">${npc.role}</div></div></div>
+    <div class="nmc-stats"><span class="nmc-stat">AC ${npc.ac}</span><span class="nmc-stat">HP ${npc.hp}</span><span class="nmc-stat">Spd ${npc.speed}</span></div>
+    ${actions}`;
+  document.getElementById('npc-mini-overlay').classList.add('open');
+}
+function closeNPCMini(){document.getElementById('npc-mini-overlay').classList.remove('open');}
+// ══ NOTES TAB ══
+function renderNotes(){
+  const el=document.getElementById('tab-notes');
+  const acts=[1,2,3];
+  const actLabels={1:'Act 1 — All Aboard the Chaos',2:'Act 2 — Isla Maldita',3:'Act 3 — The Kraken Problem'};
+  let scenesHtml='';
+  acts.forEach(a=>{
+    scenesHtml+=`<div class="act-label">${actLabels[a]}</div><div class="scene-list">`;
+    SCENES.filter(s=>s.act===a).forEach(s=>{
+      const st=sceneState(s.id);
+      scenesHtml+=`<div class="scene-row${st.done?' done':''}">
+        <div class="scene-check" onclick="toggleScene('${s.id}')">${st.done?'✓':''}</div>
+        <div class="scene-info" onclick="openScenePanel('${s.id}')">
+          <div class="scene-label">${s.label}</div>
+          <div class="scene-desc">${s.desc}</div>
+          <div class="scene-open-hint">tap for full guide →</div>
+        </div>
+      </div>`;
+    });
+    scenesHtml+='</div>';
+  });
+  // Scene notes summary
+  let sceneNotesHtml='';
+  if(S.sceneNotes){
+    acts.forEach(a=>{
+      const entries=SCENES.filter(s=>s.act===a&&S.sceneNotes[s.id]?.trim());
+      if(!entries.length)return;
+      sceneNotesHtml+=`<div class="act-label">${actLabels[a]}</div>`;
+      entries.forEach(s=>{sceneNotesHtml+=`<div class="scene-note-entry"><div class="sne-label">${s.label}</div><div class="sne-text">${S.sceneNotes[s.id]}</div></div>`;});
+    });
+  }
+  el.innerHTML=`
+    <div class="card"><div class="card-head" onclick="toggleCard(this)">📍 &nbsp;Scene Progress <span class="chv">▾</span></div>
+    <div class="card-body">${scenesHtml}</div></div>
+    <div class="card"><div class="card-head" onclick="toggleCard(this)">📝 &nbsp;Session Notes <span class="chv">▾</span></div>
+    <div class="card-body"><textarea class="notes-textarea" id="gm-notes" placeholder="Running notes, player decisions, improvised NPCs…" oninput="saveGMNotes(this.value)">${S.notes||''}</textarea></div></div>
+    ${sceneNotesHtml?`<div class="card"><div class="card-head collapsed" onclick="toggleCard(this)">🗒 &nbsp;Scene Notes <span class="chv">▾</span></div><div class="card-body hidden">${sceneNotesHtml}</div></div>`:''}
+    <div class="card"><div class="card-head collapsed" onclick="toggleCard(this)">🎲 &nbsp;Quick Reference <span class="chv">▾</span></div>
+    <div class="card-body hidden">
+      <div style="font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--parchment-dark);opacity:.5;margin-bottom:.38rem">Difficulty Class</div>
+      <div class="quick-ref-grid">
+        <div class="qr-box"><div class="qr-diff">Easy</div><div class="qr-dc">10</div></div>
+        <div class="qr-box"><div class="qr-diff">Medium</div><div class="qr-dc">14</div></div>
+        <div class="qr-box"><div class="qr-diff">Hard</div><div class="qr-dc">17</div></div>
+        <div class="qr-box"><div class="qr-diff">Very Hard</div><div class="qr-dc">20</div></div>
+      </div>
+      <div style="height:.55rem"></div>
+      <button class="sea-event-btn" onclick="rollSeaEvent()">🌊 Roll Random Sea Event (d6)</button>
+      <div class="sea-event-result" id="sea-event-result"></div>
+    </div></div>`;
+}
+function toggleScene(id){const st=sceneState(id);st.done=!st.done;save();renderNotes();}
+let notesTimer;
+function saveGMNotes(v){clearTimeout(notesTimer);notesTimer=setTimeout(()=>{S.notes=v;save();},400);}
+function rollSeaEvent(){const r=Math.floor(Math.random()*6);const el=document.getElementById('sea-event-result');el.textContent='d6: '+(r+1)+' — '+SEA_EVENTS[r];el.classList.remove('visible');requestAnimationFrame(()=>el.classList.add('visible'));showToast('🌊 Sea event: '+(r+1));}
+function toggleCard(head){const body=head.nextElementSibling;const c=head.classList.contains('collapsed');head.classList.toggle('collapsed',!c);body.classList.toggle('hidden',!c);}
+// ══ COMBAT TAB ══
+function renderCombat(){
+  const el=document.getElementById('tab-combat');
+  const {round,activeIdx,combatants}=S.combat;
+  const sorted=[...combatants].sort((a,b)=>b.init-a.init);
+  const activeId=combatants[activeIdx]?.id;
+  let rowsHtml=combatants.length===0?'<div class="empty-combat">No combatants yet.<br>Add enemies above or Quick Add PCs.</div>':
+    sorted.map(c=>{
+      const pct=c.maxHp>0?Math.max(0,Math.min(100,c.hp/c.maxHp*100)):0;
+      const hpCls=pct<=25?'danger':pct<=50?'warning':'';
+      const isActive=c.id===activeId;
+      return`<div class="combatant-row type-${c.type}${isActive?' active-turn':''}">
+        <div class="combatant-top">
+          <div class="c-init">${c.init}</div><div class="c-name">${c.name}</div>
+          <div class="c-hp-display${hpCls?' '+hpCls:''}">${c.hp}/${c.maxHp}</div>
+          <div class="c-remove" onclick="removeCombatant('${c.id}')">✕</div>
+        </div>
+        <div class="hp-bar-wrap"><div class="hp-bar-fill${hpCls?' '+hpCls:''}" style="width:${pct}%"></div></div>
+        <div class="dmg-row">
+          <button class="dmg-btn neg" onclick="applyHp('${c.id}',-25)">−25</button>
+          <button class="dmg-btn neg" onclick="applyHp('${c.id}',-10)">−10</button>
+          <button class="dmg-btn neg" onclick="applyHp('${c.id}',-5)">−5</button>
+          <button class="dmg-btn neg" onclick="applyHp('${c.id}',-1)">−1</button>
+          <input class="custom-dmg" id="cdmg-${c.id}" type="number" placeholder="±" inputmode="numeric">
+          <button class="apply-btn" onclick="applyCustomDmg('${c.id}')">Apply</button>
+          <button class="dmg-btn pos" onclick="applyHp('${c.id}',5)">+5</button>
+          <button class="dmg-btn pos" onclick="applyHp('${c.id}',10)">+10</button>
+        </div></div>`;
+    }).join('');
+  el.innerHTML=`
+    <div class="add-form">
+      <div class="add-form-title">➕ Add Combatant</div>
+      <div class="add-row">
+        <input class="add-input" id="add-name" type="text" placeholder="Name">
+        <input class="add-input small" id="add-init" type="number" placeholder="Init" inputmode="numeric">
+        <input class="add-input small" id="add-hp" type="number" placeholder="HP" inputmode="numeric">
+        <button class="add-btn" onclick="addCombatant()">Add</button>
+      </div>
+      <div style="font-family:var(--font-d);font-size:.52rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--parchment-dark);opacity:.4;margin-bottom:.28rem">Quick add PCs</div>
+      <div class="quick-add-row">${GM_CHARS.map(c=>`<div class="qa-btn" onclick="quickAddPC(${c.idx})">${c.emoji} ${c.name.split(' ')[0]}</div>`).join('')}</div>
+    </div>
+    <div class="combat-controls">
+      <div class="round-display">Round <span>${round===0?'—':round}</span></div>
+      <div style="display:flex;gap:.4rem"><button class="clear-btn" onclick="clearCombat()">🗑 Clear</button><button class="next-btn" onclick="nextTurn()">▶ Next</button></div>
+    </div>
+    <div class="combatant-list">${rowsHtml}</div>`;
+}
+function addCombatant(){const name=document.getElementById('add-name').value.trim();const init=parseInt(document.getElementById('add-init').value)||0;const hp=parseInt(document.getElementById('add-hp').value)||20;if(!name){showToast('Enter a name');return;}S.combat.combatants.push({id:Date.now().toString(),name,init,hp,maxHp:hp,type:'enemy'});if(S.combat.round===0)S.combat.round=1;save();renderCombat();showToast('➕ '+name+' added');}
+function quickAddPC(idx){const c=GM_CHARS[idx];if(S.combat.combatants.find(x=>x.id==='pc_'+idx)){showToast(c.name+' already in tracker');return;}S.combat.combatants.push({id:'pc_'+idx,name:c.full,init:0,hp:c.maxHp,maxHp:c.maxHp,type:'player'});if(S.combat.round===0)S.combat.round=1;save();renderCombat();showToast('➕ '+c.name+' added — set initiative!');}
+function addNPCToCombat(npcId){const npc=NPCS.find(n=>n.id===npcId);if(!npc)return;if(S.combat.combatants.find(x=>x.id===npcId)){showToast(npc.name+' already in tracker');return;}const init=parseInt(prompt(npc.name+' — initiative?','0'))||0;S.combat.combatants.push({id:npcId,name:npc.name,init,hp:npc.hp,maxHp:npc.hp,type:'npc'});if(S.combat.round===0)S.combat.round=1;save();switchTab('combat');showToast('⚔️ '+npc.name+' added (init '+init+')');}
+function applyHp(id,delta){
+  const c=S.combat.combatants.find(x=>x.id===id);if(!c)return;
+  const prev=c.hp;
+  c.hp=Math.max(0,Math.min(c.maxHp,c.hp+delta));
+  if(c.hp===0)showToast('💀 '+c.name+' is DOWN!');
+  save();
+  // Update HP display and bar in-place without full re-render
+  const rows=document.querySelectorAll('.combatant-row');
+  let found=false;
+  rows.forEach(row=>{
+    const btn=row.querySelector('[onclick*="'+id+'"]');
+    if(!btn&&!row.innerHTML.includes('"'+id+'"'))return;
+    const hpEl=row.querySelector('.c-hp-display');
+    const barEl=row.querySelector('.hp-bar-fill');
+    if(hpEl&&barEl){
+      found=true;
+      const pct=c.maxHp>0?Math.max(0,Math.min(100,c.hp/c.maxHp*100)):0;
+      const hpCls=pct<=25?'danger':pct<=50?'warning':'';
+      hpEl.textContent=c.hp+'/'+c.maxHp;
+      hpEl.className='c-hp-display'+(hpCls?' '+hpCls:'')+(delta<0?' anim-dmg':' anim-heal');
+      hpEl.addEventListener('animationend',()=>hpEl.classList.remove('anim-dmg','anim-heal'),{once:true});
+      barEl.style.width=pct+'%';
+      barEl.className='hp-bar-fill'+(hpCls?' '+hpCls:'');
+    }
+  });
+  if(!found)renderCombat();
+}
+function applyCustomDmg(id){const input=document.getElementById('cdmg-'+id);const val=parseInt(input?.value)||0;if(!val)return;applyHp(id,val);}
+function removeCombatant(id){S.combat.combatants=S.combat.combatants.filter(c=>c.id!==id);if(S.combat.activeIdx>=S.combat.combatants.length)S.combat.activeIdx=0;save();renderCombat();}
+function nextTurn(){const c=S.combat.combatants;if(!c.length)return;const sorted=[...c].sort((a,b)=>b.init-a.init);if(S.combat.activeIdx===-1){S.combat.activeIdx=0;S.combat.round=1;}else{const curId=c[S.combat.activeIdx]?.id;const curSi=sorted.findIndex(x=>x.id===curId);const nsi=(curSi+1)%sorted.length;if(nsi===0)S.combat.round++;const nid=sorted[nsi].id;S.combat.activeIdx=c.findIndex(x=>x.id===nid);}const active=c[S.combat.activeIdx];showToast('▶ Round '+S.combat.round+' — '+active.name);save();renderCombat();}
+function clearCombat(){if(!confirm('Clear all combatants and reset round counter?'))return;S.combat={round:0,activeIdx:-1,combatants:[]};save();renderCombat();showToast('🗑 Combat cleared');}
+// ══ PARTY TAB ══
+function renderParty(){
+  const el=document.getElementById('tab-party');
+  el.innerHTML='<div class="party-grid">'+GM_CHARS.map(c=>{
+    const exp=S.cardExpanded?.['pc_'+c.idx];
+    const wHtml=c.weapons.map(w=>`<div class="pc-weapon"><span class="pcw-name">${w.n}</span><span class="pcw-hit">${w.h}</span><span class="pcw-dmg">${w.d}</span></div>`).join('');
+    return`<div class="pc-card">
+      <div class="pc-head" onclick="togglePCCard(${c.idx})">
+        <div class="pc-emoji">${c.emoji}</div>
+        <div class="pc-info"><div class="pc-name">${c.full}</div><div class="pc-class">${c.cls}</div>
+          <div class="pc-stats-row"><span class="pc-stat-chip">HP ${c.maxHp}</span><span class="pc-stat-chip">AC ${c.ac}</span><span class="pc-stat-chip">Init ${c.init}</span><span class="pc-stat-chip">PP ${c.passPerc}</span>${c.spellSave?`<span class="pc-stat-chip">DC ${c.spellSave}</span>`:''}</div>
+        </div>
+      </div>
+      <div class="pc-detail${exp?' open':''}">
+        <div class="pc-detail-grid">
+          <div><span class="pc-detail-label">Saves (Prof)</span>${c.profSaves}</div>
+          ${c.spellSave?`<div><span class="pc-detail-label">Spell Save DC</span>${c.spellSave}</div>`:''}
+          ${c.darkvision?`<div><span class="pc-detail-label">Darkvision</span>${c.darkvision}</div>`:''}
+          <div><span class="pc-detail-label">Pass. Perception</span>${c.passPerc}</div>
+        </div>
+        <div class="divider"></div>
+        <div class="pc-weapon-list">${wHtml}</div>
+        <div class="divider"></div>
+        <div class="pc-feat-list">${c.features.map(f=>'• '+f).join('<br>')}</div>
+      </div>
+    </div>`;
+  }).join('')+'</div>';
+}
+function togglePCCard(idx){if(!S.cardExpanded)S.cardExpanded={};S.cardExpanded['pc_'+idx]=!S.cardExpanded['pc_'+idx];save();renderParty();}
+// ══ NPC TAB ══
+function renderNPCs(){
+  const el=document.getElementById('tab-npcs');
+  el.innerHTML='<div class="npc-list">'+NPCS.map(npc=>{
+    const exp=S.npcExpanded?.[npc.id];
+    const statRow=npc.stats?`<div class="stat-block-row">${['str','dex','con','int','wis','cha'].map(s=>{const v=npc.stats[s];const m=Math.floor((v-10)/2);return`<div class="sbl-box"><div class="sbl-label">${s.toUpperCase()}</div><div class="sbl-score">${v}</div><div class="sbl-mod">${m>=0?'+'+m:m}</div></div>`;}).join('')}</div>`:'';
+    const actHtml=npc.actions?.length?`<div class="npc-section-label">Actions</div><div class="action-list">${npc.actions.map(a=>`<div class="action-row"><div class="action-name">${a.n}</div><div class="action-desc">${a.d}</div></div>`).join('')}</div>`:'';
+    const baHtml=npc.bonusActions?.length?`<div class="npc-section-label">Bonus Actions</div><div class="action-list">${npc.bonusActions.map(a=>`<div class="action-row"><div class="action-name">${a.n}</div><div class="action-desc">${a.d}</div></div>`).join('')}</div>`:'';
+    const rxHtml=npc.reactions?.length?`<div class="npc-section-label">Reactions</div><div class="action-list">${npc.reactions.map(a=>`<div class="action-row"><div class="action-name">${a.n}</div><div class="action-desc">${a.d}</div></div>`).join('')}</div>`:'';
+    const outHtml=npc.outcomes?.length?`<div class="npc-section-label">Outcomes</div><div class="outcome-list">${npc.outcomes.map(o=>`<div class="outcome-row"><div class="outcome-label">${o.label}</div><div class="outcome-desc">${o.d}</div></div>`).join('')}</div>`:'';
+    const secHtml=npc.secret?`<div class="npc-secret"><div class="npc-secret-label">🔒 Secret</div><div class="npc-secret-text">${npc.secret}</div></div>`:'';
+    const saves=npc.saves&&npc.saves!=='—'?`<div style="font-family:var(--font-b);font-size:.72rem;color:var(--parchment-dark);margin-top:.2rem"><strong>Saves:</strong> ${npc.saves}${npc.skills&&npc.skills!=='—'?' · <strong>Skills:</strong> '+npc.skills:''}</div>`:'';
+    const heartHtml=npc.id==='kraken'?`<div class="heart-mechanic"><div class="heart-label">💛 Amber Heart — Weakness</div><div class="heart-text">Announce targeting heart before rolling. <strong>DC 18 attack/spell</strong> → stunned 1 round. <strong>Three hits = fight ends.</strong></div></div>`:'';
+    return`<div class="npc-card">
+      <div class="npc-head" onclick="toggleNPC('${npc.id}')">
+        <div class="npc-emoji">${npc.emoji}</div>
+        <div style="flex:1"><div class="npc-name">${npc.name}${npc.cr?` <span style="font-size:.52rem;opacity:.55">CR ${npc.cr}</span>`:''}</div>
+          <div class="npc-role">${npc.role}</div>
+          <div class="npc-key-stats"><span class="npc-stat">AC ${npc.ac}${npc.acNote?' ('+npc.acNote+')':''}</span><span class="npc-stat">HP ${npc.hp}</span><span class="npc-stat">${npc.speed}</span></div>
+        </div>
+      </div>
+      <div class="npc-body${exp?' open':''}">
+        ${statRow}${saves}${actHtml}${baHtml}${rxHtml}
+        <div class="divider"></div>
+        <div class="npc-personality">${npc.personality}</div>
+        ${heartHtml}${outHtml}${secHtml}
+        ${['pete','giulia','gcrab','pirate','veteran'].includes(npc.id)?'':
+          `<button class="add-to-combat-btn" onclick="addNPCToCombat('${npc.id}')">⚔️ Add to Combat Tracker</button>`}
+      </div>
+    </div>`;
+  }).join('')+'</div>';
+}
+function toggleNPC(id){if(!S.npcExpanded)S.npcExpanded={};S.npcExpanded[id]=!S.npcExpanded[id];save();renderNPCs();}
+// ══ LOOT TAB ══
+function renderLoot(){
+  const el=document.getElementById('tab-loot');
+  const charOpts='<option value="-1">— Unassigned —</option>'+GM_CHARS.map(c=>`<option value="${c.idx}">${c.emoji} ${c.name}</option>`).join('');
+  el.innerHTML='<div class="loot-list">'+LOOT.map(item=>{
+    const st=lootState(item.id);
+    const rCls='rarity-'+item.rarity.toLowerCase().replace(' ','-').replace('very-rare','very-rare');
+    return`<div class="loot-card${st.distributed?' distributed':''}">
+      <div class="loot-header"><div class="loot-emoji">${item.emoji}</div><div class="loot-name">${item.name}</div>
+        <span class="rarity-badge ${rCls}">${item.rarity}</span>${item.cursed?'<span class="cursed-badge">CURSED</span>':''}
+      </div>
+      <div class="loot-type">${item.type}</div>
+      <div class="loot-desc">${item.desc}</div>
+      <div class="loot-fx">${item.fx}</div>
+      <div class="loot-assign-row"><span class="assign-label">Send to:</span>
+        <select class="assign-select" id="assign-${item.id}" onchange="assignItem('${item.id}',this.value)">${charOpts}</select>
+      </div>
+      <div class="loot-code-chip" onclick="copyItemCode('${item.id}')" title="Tap to copy — or just read it out to the player">
+        <span class="cc-lbl">CODE</span><span class="cc-val">${item.code}</span><span class="cc-ico">📋</span>
+      </div>
+      <div class="loot-actions">
+        <button class="sent-btn${st.distributed?' active':''}" onclick="toggleDistributed('${item.id}')">${st.distributed?'✓ Sent':'Mark Sent'}</button>
+      </div>
+    </div>`;
+  }).join('')+'</div>';
+  LOOT.forEach(item=>{const st=lootState(item.id);const sel=document.getElementById('assign-'+item.id);if(sel)sel.value=st.assignedChar;});
+}
+function assignItem(id,charIdx){const st=lootState(id);st.assignedChar=parseInt(charIdx);save();}
+async function copyItemCode(id){
+  const item=LOOT.find(it=>it.id===id);
+  if(!item)return;
+  try{await navigator.clipboard.writeText(item.code);showToast('📋 Code “'+item.code+'” copied');}
+  catch(e){showToast('Code: '+item.code+' — read it out to the player');}
+}
+function toggleDistributed(id){const st=lootState(id);st.distributed=!st.distributed;save();renderLoot();}
+// ══ TOAST ══
+let toastT;
+function showToast(msg){const el=document.getElementById('toast');el.innerHTML=`<div class="toast-msg">${msg}</div>`;clearTimeout(toastT);toastT=setTimeout(()=>el.innerHTML='',2200);}
+// ══ INIT ══
+renderNotes();renderParty();
+switchTab(S.activeTab||'notes');
+</script>
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('gm-sw.js').catch(function(){});});}
+</script>
+</body>
+</html>

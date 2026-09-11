@@ -1,0 +1,17 @@
+{
+  "name": "Gilded Kraken \u2014 GM Screen",
+  "short_name": "Kraken GM",
+  "description": "GM tools for The Curse of the Gilded Kraken pirate one-shot.",
+  "lang": "en",
+  "start_url": "./gilded_kraken_gm_v5.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d1b2a",
+  "theme_color": "#0d1b2a",
+  "icons": [
+    {"src": "gm-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "gm-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "gm-icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
