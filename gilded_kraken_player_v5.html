@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>☠ Gilded Kraken — Player Sheet v5</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+/* ===== TOKENS ===== */
+:root{
+  --navy:#0d1b2a;--navy-mid:#1a2e45;--navy-light:#243b55;
+  --parchment:#f4e9d0;--parchment-dark:#e8d5a3;
+  --gold:#c9922a;--gold-light:#e8b84b;--gold-bright:#ffd76a;
+  --amber:#d4822a;--rust:#8b3a1e;
+  --sea:#2a6b5e;--sea-light:#3d9a89;
+  --text-dark:#1a1208;--text-mid:#3d2e14;--text-light:#6b5230;
+  --white:#fdf8ef;
+  --cond-red:#c0392b;--cond-teal:#0891b2;
+  --spell-purple:#8b5cf6;--warlock-pink:#ec4899;--insp-cyan:#06b6d4;
+  --drunk-sober:#6b7280;--drunk-tipsy:#16a34a;--drunk-drunk:#d97706;--drunk-wasted:#dc2626;--drunk-blotto:#9333ea;
+  --font-d:'Cinzel','Palatino Linotype',Georgia,serif;
+  --font-b:'Crimson Text',Georgia,'Times New Roman',serif;
+}
+/* ===== ANIMATION TOKENS ===== */
+:root{
+  --ease-out-quart:cubic-bezier(0.165,0.84,0.44,1);
+  --ease-out-cubic:cubic-bezier(0.215,0.61,0.355,1);
+  --ease-in-out-cubic:cubic-bezier(0.645,0.045,0.355,1);
+  --dur-micro:120ms;
+  --dur-ui:200ms;
+  --dur-modal:240ms;
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{background:var(--navy);color:var(--parchment);font-family:var(--font-b);min-height:100vh;overflow-x:hidden;padding-bottom:80px}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 80%,rgba(42,107,94,.15) 0,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(201,146,42,.08) 0,transparent 50%);z-index:-1}
+
+/* ===== SELECTION SCREEN ===== */
+#sel-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:1.5rem .8rem 2rem}
+.sel-logo{text-align:center;margin-bottom:1.5rem}
+.sel-logo-title{font-family:var(--font-d);font-size:clamp(1.2rem,6vw,2rem);font-weight:900;color:var(--gold-light);text-shadow:0 0 30px rgba(232,184,75,.4);line-height:1.2}
+.sel-logo-sub{font-family:var(--font-b);font-style:italic;font-size:.85rem;color:var(--parchment-dark);opacity:.7;margin-top:.3rem}
+.sel-logo::after{content:'';display:block;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin-top:1rem}
+.sel-prompt{font-family:var(--font-d);font-size:.75rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-light);opacity:.7;margin-bottom:1rem;text-align:center}
+.sel-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;width:100%;max-width:480px}
+.sel-card{background:linear-gradient(135deg,var(--navy-mid) 0,var(--navy-light) 100%);border:2px solid rgba(201,146,42,.25);border-radius:16px;padding:1rem .75rem;cursor:pointer;transition:all .2s ease;-webkit-tap-highlight-color:transparent;display:flex;flex-direction:column;align-items:center;gap:.35rem;position:relative;overflow:hidden;touch-action:manipulation}
+.sel-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,146,42,.08),transparent);opacity:0;transition:opacity var(--dur-micro) ease}
+.sel-card:active::before,.sel-card:active{border-color:var(--gold);transform:scale(.97)}
+.sel-card.disabled{opacity:.45;cursor:not-allowed}
+@keyframes sel-card-in{from{opacity:0;transform:scale(0.95) translateY(6px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.sel-card{background:linear-gradient(135deg,var(--navy-mid) 0,var(--navy-light) 100%);border:2px solid rgba(201,146,42,.25);border-radius:16px;padding:1rem .75rem;cursor:pointer;transition:border-color var(--dur-micro) ease,transform var(--dur-micro) ease;-webkit-tap-highlight-color:transparent;display:flex;flex-direction:column;align-items:center;gap:.35rem;position:relative;overflow:hidden;touch-action:manipulation;animation:sel-card-in var(--dur-modal) var(--ease-out-quart) both}
+.sel-emoji{font-size:2.8rem;line-height:1}
+.sel-name{font-family:var(--font-d);font-size:.78rem;font-weight:700;color:var(--gold-light);text-align:center;line-height:1.2}
+.sel-name small{display:block;font-size:.58rem;font-family:var(--font-b);font-style:italic;font-weight:400;color:var(--parchment-dark);opacity:.65;margin-top:.1rem}
+.sel-class{font-family:var(--font-d);font-size:.6rem;font-weight:600;letter-spacing:.05em;color:var(--parchment-dark);opacity:.6}
+.sel-stats{display:flex;gap:.5rem;margin-top:.2rem}
+.sel-stat{font-family:var(--font-d);font-size:.58rem;font-weight:700;background:rgba(0,0,0,.3);border-radius:4px;padding:.08rem .3rem;color:var(--parchment-dark)}
+.sel-card:nth-child(1){animation-delay:40ms}
+.sel-card:nth-child(2){animation-delay:80ms}
+.sel-card:nth-child(3){animation-delay:120ms}
+.sel-card:nth-child(4){animation-delay:160ms}
+.sel-card:nth-child(5){animation-delay:200ms}
+.sel-card:nth-child(6){animation-delay:240ms}
+.sel-card:last-child:nth-child(odd){grid-column:1/-1;max-width:220px;justify-self:center}
+
+/* ===== SHEET SCREEN ===== */
+#sheet-screen{display:none}
+.sheet-top-bar{background:var(--navy);border-bottom:2px solid var(--navy-light);padding:.5rem .75rem;display:flex;align-items:center;gap:.6rem;position:sticky;top:0;z-index:100}
+.back-btn{background:rgba(201,146,42,.15);border:1px solid rgba(201,146,42,.3);border-radius:8px;padding:.32rem .55rem;font-family:var(--font-d);font-size:.6rem;font-weight:700;letter-spacing:.05em;color:var(--gold-light);cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap;touch-action:manipulation}
+.back-btn:active{background:rgba(201,146,42,.3)}
+.topbar-char-name{font-family:var(--font-d);font-size:.75rem;font-weight:700;color:var(--gold-light);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar-conds{display:flex;flex-wrap:wrap;gap:.2rem;max-width:180px}
+.topbar-cond-badge{font-size:.55rem;background:rgba(192,57,43,.3);border:1px solid rgba(192,57,43,.5);border-radius:3px;padding:.07rem .28rem;color:#ff8a80;font-family:var(--font-d);font-weight:600;white-space:nowrap}
+.topbar-cond-badge.conc{background:rgba(8,145,178,.25);border-color:rgba(8,145,178,.5);color:#67e8f9}
+
+/* ===== CHAR HEADER ===== */
+.char-header{background:linear-gradient(135deg,var(--navy) 0,var(--navy-mid) 50%,var(--navy-light) 100%);color:var(--parchment);padding:.9rem .9rem .7rem;overflow:hidden;position:relative}
+.char-header::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23c9922a' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E")}
+.char-name-row{display:flex;align-items:flex-start;gap:.6rem;position:relative}
+.char-emoji{font-size:2.6rem;line-height:1;flex-shrink:0}
+.char-name-block .char-name{font-family:var(--font-d);font-size:clamp(1rem,4.5vw,1.5rem);font-weight:700;color:var(--gold-light);text-shadow:0 2px 8px rgba(0,0,0,.5);line-height:1.1}
+.char-name-block .char-name small{display:block;font-size:.68rem;color:var(--parchment-dark);opacity:.7;font-style:italic;font-family:var(--font-b);font-weight:400}
+.char-tags{display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.35rem}
+.tag{background:rgba(201,146,42,.2);border:1px solid rgba(201,146,42,.35);border-radius:4px;padding:.12rem .4rem;font-size:.62rem;font-family:var(--font-d);font-weight:600;letter-spacing:.04em;color:var(--gold-light)}
+.tag.race{background:rgba(61,154,137,.2);border-color:rgba(61,154,137,.4);color:#7dd8cc}
+.tag.align{background:rgba(139,58,30,.25);border-color:rgba(139,58,30,.5);color:#e8956d}
+.char-flavor{margin-top:.6rem;font-family:var(--font-b);font-style:italic;font-size:.78rem;color:var(--parchment-dark);opacity:.85;border-left:2px solid var(--gold);padding-left:.55rem;line-height:1.4;position:relative}
+
+/* ===== LAYOUT ===== */
+.char-content{background:var(--parchment);padding:.7rem;display:flex;flex-direction:column;gap:.65rem}
+.section-card{background:var(--white);border:1px solid rgba(139,90,43,.18);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.09)}
+.section-head{background:linear-gradient(90deg,var(--navy) 0,var(--navy-mid) 100%);color:var(--gold-light);font-family:var(--font-d);font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.45rem .75rem;display:flex;align-items:center;gap:.35rem;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.section-head .chv{margin-left:auto;transition:transform var(--dur-ui) var(--ease-in-out-cubic);font-style:normal;font-size:.75rem}
+.section-head.collapsed .chv{transform:rotate(-90deg)}
+.section-body{padding:.65rem .75rem;overflow:hidden}
+.section-body.hidden{display:none}
+
+/* ===== ABILITY SCORES ===== */
+.ability-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:.35rem}
+.ability-box{background:var(--navy);border:1px solid var(--gold);border-radius:8px;text-align:center;padding:.35rem .15rem}
+.ab-label{font-family:var(--font-d);font-size:.46rem;font-weight:700;letter-spacing:.07em;color:var(--gold-light);text-transform:uppercase}
+.ab-score{font-family:var(--font-d);font-size:1.25rem;font-weight:900;color:var(--white);line-height:1;margin:.08rem 0}
+.ab-mod{font-family:var(--font-d);font-size:.7rem;font-weight:700;color:var(--gold-bright);background:rgba(201,146,42,.2);border-radius:10px;padding:.03rem .28rem;display:inline-block}
+
+/* ===== COMBAT STATS ===== */
+.combat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem}
+.stat-box{background:var(--navy);border:1px solid rgba(201,146,42,.28);border-radius:8px;text-align:center;padding:.45rem .25rem;position:relative}
+.stat-label{font-family:var(--font-d);font-size:.45rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--parchment-dark);opacity:.7}
+.stat-value{font-family:var(--font-d);font-size:1.3rem;font-weight:700;color:var(--gold-light);line-height:1;margin-top:.08rem}
+.stat-value.sm{font-size:.95rem}
+.stat-mod-badge{position:absolute;top:3px;right:4px;font-size:.42rem;color:var(--gold-bright);font-family:var(--font-d);font-weight:700;opacity:.8}
+
+/* ===== HP ===== */
+.hp-tracker{background:var(--navy);border:2px solid var(--gold);border-radius:12px;padding:.75rem;display:flex;flex-direction:column;align-items:center;gap:.5rem}
+.hp-lbl{font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-light)}
+.hp-display{display:flex;align-items:center;gap:.4rem}
+.hp-cur{font-family:var(--font-d);font-size:2.8rem;font-weight:900;color:var(--gold-bright);text-shadow:0 0 20px rgba(255,215,106,.4);line-height:1;min-width:2.5ch;text-align:center;transition:color var(--dur-ui) var(--ease-out-cubic);will-change:transform}
+.hp-cur.danger{color:#ff6b6b;text-shadow:0 0 20px rgba(255,107,107,.5)}
+.hp-cur.warning{color:#ffa94d;text-shadow:0 0 20px rgba(255,169,77,.5)}
+@keyframes hp-dmg{0%{transform:scale(1.15)}60%{transform:scale(0.92)}100%{transform:scale(1)}}
+@keyframes hp-heal{0%{transform:scale(0.9)}70%{transform:scale(1.08)}100%{transform:scale(1)}}
+.hp-cur.anim-dmg{animation:hp-dmg 300ms var(--ease-out-cubic)}
+.hp-cur.anim-heal{animation:hp-heal 280ms var(--ease-out-cubic)}
+.hp-div{font-size:1.4rem;color:var(--parchment-dark);opacity:.35;font-family:var(--font-d)}
+.hp-max{font-family:var(--font-d);font-size:1.1rem;font-weight:600;color:var(--parchment-dark);opacity:.55}
+.hp-controls{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;justify-content:center}
+.hp-input-row{display:flex;gap:.35rem;align-items:center}
+.hp-input{background:var(--navy-light);border:1px solid rgba(201,146,42,.4);border-radius:6px;color:var(--white);font-family:var(--font-d);font-size:.95rem;font-weight:600;text-align:center;width:58px;padding:.28rem;-webkit-appearance:none}
+.hp-input:focus{outline:none;border-color:var(--gold)}
+.hp-btn{padding:.38rem .75rem;border:none;border-radius:6px;font-family:var(--font-d);font-size:.7rem;font-weight:700;letter-spacing:.04em;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform var(--dur-micro) ease,opacity var(--dur-micro) ease;touch-action:manipulation}
+.hp-btn:active{transform:scale(0.95);opacity:.85}
+.hp-btn.heal{background:var(--sea);color:var(--white)}
+.hp-btn.dmg{background:var(--rust);color:var(--white)}
+.hp-btn.reset{background:rgba(201,146,42,.18);border:1px solid var(--gold);color:var(--gold-light)}
+.temp-hp-row{display:flex;align-items:center;gap:.45rem;font-size:.72rem;color:var(--parchment-dark);font-family:var(--font-d)}
+.thp-input{background:var(--navy-light);border:1px solid rgba(61,154,137,.4);border-radius:4px;color:#7dd8cc;font-family:var(--font-d);font-size:.82rem;font-weight:600;text-align:center;width:42px;padding:.18rem}
+
+/* ===== DEATH SAVES ===== */
+.death-saves{display:flex;gap:.9rem;align-items:center;padding:.4rem 0}
+.ds-group{display:flex;flex-direction:column;align-items:center;gap:.25rem}
+.ds-label{font-family:var(--font-d);font-size:.52rem;font-weight:700;letter-spacing:.07em;color:var(--text-light)}
+.ds-pips{display:flex;gap:.28rem}
+.ds-pip{width:24px;height:24px;border-radius:50%;border:2px solid var(--text-light);cursor:pointer;background:transparent;transition:background var(--dur-ui) var(--ease-out-cubic),border-color var(--dur-ui) var(--ease-out-cubic),transform var(--dur-micro) ease;-webkit-tap-highlight-color:transparent;touch-action:manipulation;will-change:transform}
+.ds-pip:active{transform:scale(0.85)}
+.ds-pip.success.filled{background:var(--sea);border-color:var(--sea-light)}
+.ds-pip.failure.filled{background:var(--rust);border-color:#c0392b}
+
+/* ===== PIPS ===== */
+.resource-tracker{margin-bottom:.55rem}
+.resource-tracker:last-of-type{margin-bottom:0}
+.res-label{font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-mid);margin-bottom:.3rem;display:flex;align-items:center;gap:.35rem}
+.rest-badge{font-size:.5rem;background:var(--navy);color:var(--parchment-dark);border-radius:4px;padding:.08rem .28rem;opacity:.65;font-weight:600}
+.pip-row{display:flex;flex-wrap:wrap;gap:.38rem}
+.pip{width:30px;height:30px;border-radius:50%;border:2px solid var(--gold);background:var(--parchment);cursor:pointer;position:relative;transition:all .13s;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+.pip.used{background:var(--gold);border-color:var(--amber)}
+.pip.used::after{content:'✕';color:var(--navy);font-size:.62rem;font-weight:900;font-family:var(--font-d)}
+.pip.spell{border-color:var(--spell-purple)}
+.pip.spell.used{background:var(--spell-purple);border-color:#6d28d9}
+.pip.spell.used::after{color:var(--white)}
+.pip.warlock{border-color:var(--warlock-pink)}
+.pip.warlock.used{background:var(--warlock-pink);border-color:#be185d}
+.pip.warlock.used::after{color:var(--white)}
+.pip.insp{border-color:var(--insp-cyan)}
+.pip.insp.used{background:var(--insp-cyan)}
+.pip.insp.used::after{color:var(--white)}
+.pip.ki{border-color:#a78bfa}
+.pip.ki.used{background:#7c3aed;border-color:#6d28d9}
+.pip.ki.used::after{color:var(--white)}
+.spell-level-row{display:flex;align-items:center;gap:.45rem;margin-bottom:.35rem}
+.spell-level-label{font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.04em;color:var(--text-light);width:46px;flex-shrink:0}
+
+/* ===== CONDITIONS ===== */
+.cond-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.3rem;margin-bottom:.5rem}
+.cond-btn{background:var(--navy);border:1px solid rgba(139,90,43,.3);border-radius:7px;padding:.38rem .2rem;cursor:pointer;font-family:var(--font-d);font-size:.54rem;font-weight:600;letter-spacing:.03em;color:var(--parchment-dark);transition:all .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:44px;justify-content:center}
+.cond-btn .ci{font-size:1.1rem;line-height:1}
+.cond-btn.active{background:rgba(192,57,43,.3);border-color:var(--cond-red);color:#ff8a80}
+.cond-btn.conc-btn.active{background:rgba(8,145,178,.25);border-color:var(--cond-teal);color:#67e8f9}
+.exh-row{display:flex;align-items:center;gap:.5rem;margin-top:.3rem}
+.exh-label{font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-light);white-space:nowrap}
+.exh-pip{width:26px;height:26px;border-radius:50%;border:2px solid rgba(139,90,43,.3);background:var(--navy);cursor:pointer;font-family:var(--font-d);font-size:.55rem;font-weight:700;color:var(--parchment-dark);opacity:.6;display:flex;align-items:center;justify-content:center;transition:all .13s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.exh-pip.active{background:var(--rust);border-color:var(--cond-red);color:var(--white);opacity:1}
+.conc-field-row{display:none;margin-top:.5rem}
+.conc-field-row.visible{display:block}
+.conc-field-label{font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--cond-teal);margin-bottom:.3rem}
+.conc-select{width:100%;background:var(--navy);border:1px solid rgba(8,145,178,.5);border-radius:6px;color:#67e8f9;font-family:var(--font-d);font-size:.75rem;font-weight:600;padding:.38rem .5rem;appearance:none;cursor:pointer}
+.conc-custom{width:100%;background:var(--navy);border:1px solid rgba(8,145,178,.5);border-radius:6px;color:#67e8f9;font-family:var(--font-b);font-size:.85rem;padding:.35rem .5rem;margin-top:.3rem}
+
+/* ===== SAVES & SKILLS ===== */
+.saves-grid{display:grid;grid-template-columns:1fr 1fr;gap:.28rem}
+.save-row{display:flex;align-items:center;gap:.35rem;font-size:.8rem;color:var(--text-dark);padding:.15rem .3rem;border-radius:6px;cursor:pointer;transition:background .12s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.save-row:active{background:rgba(201,146,42,.12)}
+.save-pip{width:12px;height:12px;border-radius:50%;border:2px solid var(--text-light);flex-shrink:0}
+.save-pip.prof{background:var(--gold);border-color:var(--amber)}
+.save-name{flex:1;font-family:var(--font-b)}
+.save-val{font-family:var(--font-d);font-weight:700;font-size:.82rem;min-width:2rem;text-align:right}
+.save-val.pos{color:var(--sea)}.save-val.neg{color:var(--rust)}.save-val.zero{color:var(--text-light)}
+.skills-list{display:flex;flex-direction:column;gap:.18rem}
+.skill-row{display:flex;align-items:center;gap:.35rem;font-size:.78rem;padding:.12rem .3rem;border-radius:6px;cursor:pointer;transition:background .12s;-webkit-tap-highlight-color:transparent;border-bottom:1px solid rgba(139,90,43,.07);touch-action:manipulation}
+.skill-row:last-child{border-bottom:none}
+.skill-row:active{background:rgba(201,146,42,.12)}
+.skill-pip{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--text-light);flex-shrink:0}
+.skill-pip.prof{background:var(--gold);border-color:var(--amber)}
+.skill-pip.exp{background:var(--gold-bright);border-color:var(--gold);box-shadow:0 0 4px rgba(255,215,106,.6)}
+.skill-name{flex:1;font-family:var(--font-b);color:var(--text-dark)}
+.skill-attr{font-size:.62rem;color:var(--text-light);font-style:italic}
+.skill-val{font-family:var(--font-d);font-weight:700;font-size:.78rem;min-width:2rem;text-align:right}
+.skill-val.pos{color:var(--sea)}.skill-val.zero{color:var(--text-light)}.skill-val.neg{color:var(--rust)}
+.adv-badge{font-size:.5rem;font-family:var(--font-d);font-weight:700;border-radius:3px;padding:.05rem .2rem;margin-left:.2rem;vertical-align:middle}
+.adv-badge.adv{background:rgba(42,107,94,.2);color:var(--sea-light);border:1px solid rgba(42,107,94,.4)}
+.adv-badge.dis{background:rgba(139,58,30,.2);color:#e8956d;border:1px solid rgba(139,58,30,.4)}
+.passive-row{display:flex;align-items:center;justify-content:space-between;padding:.22rem 0;border-bottom:1px solid rgba(139,90,43,.09);font-size:.8rem}
+.passive-row:last-child{border-bottom:none}
+.passive-name{font-family:var(--font-b);color:var(--text-dark)}
+.passive-val{font-family:var(--font-d);font-weight:700;font-size:.85rem;color:var(--navy)}
+
+/* ===== WEAPONS ===== */
+.weapon-list{display:flex;flex-direction:column;gap:.42rem}
+.weapon-row{background:var(--navy);border:1px solid rgba(201,146,42,.2);border-radius:8px;padding:.45rem .65rem;display:grid;grid-template-columns:1fr auto auto;gap:.28rem .55rem;align-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .15s;touch-action:manipulation;position:relative}
+.weapon-row:active{border-color:rgba(201,146,42,.6)}
+.weapon-row.magic-item{border-color:rgba(255,215,106,.5);background:linear-gradient(135deg,var(--navy) 0,rgba(201,146,42,.08) 100%)}
+.weapon-name{font-family:var(--font-d);font-size:.72rem;font-weight:600;color:var(--gold-light);grid-column:1}
+.weapon-hit{font-family:var(--font-d);font-size:.68rem;font-weight:700;color:#7dd8cc}
+.weapon-dmg{font-family:var(--font-d);font-size:.68rem;font-weight:700;color:#e8956d}
+.weapon-note{font-family:var(--font-b);font-size:.65rem;font-style:italic;color:var(--parchment-dark);opacity:.55;grid-column:1/-1}
+.weapon-roll-hint{font-family:var(--font-d);font-size:.5rem;font-weight:600;letter-spacing:.05em;color:rgba(201,146,42,.45);grid-column:1/-1;text-transform:uppercase}
+
+/* ===== FEATURES ===== */
+.feature-list{display:flex;flex-direction:column;gap:.45rem}
+.feature-item{border-left:3px solid var(--gold);padding-left:.55rem}
+.feature-name{font-family:var(--font-d);font-size:.7rem;font-weight:700;letter-spacing:.04em;color:var(--text-dark)}
+.feature-badge{display:inline-block;font-size:.52rem;background:var(--navy);color:var(--parchment-dark);border-radius:4px;padding:.07rem .28rem;margin-left:.28rem;vertical-align:middle;font-family:var(--font-d);font-weight:600}
+.feature-text{font-family:var(--font-b);font-size:.8rem;color:var(--text-mid);line-height:1.4;margin-top:.18rem}
+.feature-text strong{color:var(--text-dark);font-weight:600}
+.maneuver-card{background:linear-gradient(135deg,rgba(139,58,30,.12),transparent);border:1px solid rgba(212,130,42,.28);border-radius:8px;padding:.45rem .65rem;margin-bottom:.38rem}
+.maneuver-name{font-family:var(--font-d);font-size:.7rem;font-weight:700;color:var(--amber)}
+.maneuver-desc{font-family:var(--font-b);font-size:.77rem;color:var(--text-mid);line-height:1.4;margin-top:.12rem}
+.maneuver-desc strong{color:var(--text-dark)}
+
+/* ===== SPELLS ===== */
+.spell-card{background:linear-gradient(135deg,var(--navy) 0,var(--navy-mid) 100%);border:1px solid rgba(139,92,246,.28);border-radius:8px;padding:.45rem .65rem;margin-bottom:.42rem}
+.spell-card.cantrip{border-color:rgba(6,182,212,.28)}
+.spell-header{display:flex;align-items:center;gap:.35rem;margin-bottom:.18rem}
+.spell-name{font-family:var(--font-d);font-size:.72rem;font-weight:700;color:var(--gold-light)}
+.spell-ltag{font-family:var(--font-d);font-size:.5rem;font-weight:700;border-radius:4px;padding:.07rem .28rem;background:rgba(139,92,246,.22);color:#c4b5fd;border:1px solid rgba(139,92,246,.38)}
+.spell-ltag.cantrip{background:rgba(6,182,212,.18);color:#67e8f9;border-color:rgba(6,182,212,.38)}
+.spell-ltag.wk{background:rgba(236,72,153,.18);color:#f9a8d4;border-color:rgba(236,72,153,.38)}
+.spell-meta{display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.22rem}
+.spell-tag{font-family:var(--font-d);font-size:.48rem;font-weight:600;background:rgba(255,255,255,.06);border-radius:3px;padding:.04rem .22rem;color:var(--parchment-dark);opacity:.78}
+.spell-desc{font-family:var(--font-b);font-size:.77rem;color:var(--parchment-dark);line-height:1.4}
+.spell-desc strong{color:var(--gold-light);font-weight:600}
+
+/* ===== DUTCH COURAGE ===== */
+.dc-tracker{background:var(--navy);border:2px solid rgba(201,146,42,.3);border-radius:12px;padding:.75rem}
+.dc-title{font-family:var(--font-d);font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-light);text-align:center;margin-bottom:.65rem}
+.dc-counter-row{display:flex;align-items:center;justify-content:center;gap:.6rem;margin-bottom:.7rem}
+.dc-minus,.dc-plus{width:38px;height:38px;border-radius:50%;border:2px solid rgba(201,146,42,.4);background:rgba(255,255,255,.06);color:var(--gold-light);font-family:var(--font-d);font-size:1.2rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:all .13s;touch-action:manipulation}
+.dc-minus:active,.dc-plus:active{background:rgba(201,146,42,.25)}
+.dc-count{font-family:var(--font-d);font-size:2rem;font-weight:900;color:var(--gold-bright);min-width:2ch;text-align:center;line-height:1}
+.dc-count-label{font-family:var(--font-b);font-style:italic;font-size:.65rem;color:var(--parchment-dark);opacity:.55;text-align:center;margin-top:.1rem}
+.dc-states{display:grid;grid-template-columns:repeat(5,1fr);gap:.25rem}
+.dc-state-btn{border-radius:8px;padding:.45rem .2rem;font-family:var(--font-d);font-size:.6rem;font-weight:700;letter-spacing:.03em;text-align:center;border:2px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--parchment-dark);opacity:.5;transition:background var(--dur-ui) var(--ease-in-out-cubic),border-color var(--dur-ui) var(--ease-in-out-cubic),color var(--dur-ui) var(--ease-in-out-cubic),opacity var(--dur-ui) var(--ease-in-out-cubic);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.dc-state-btn .ds-emoji{font-size:1.3rem;display:block;margin-bottom:.2rem}
+.dc-state-btn.active{opacity:1}
+.dc-state-btn.s-sober.active{border-color:var(--drunk-sober);background:rgba(107,114,128,.2);color:#9ca3af}
+.dc-state-btn.s-tipsy.active{border-color:var(--drunk-tipsy);background:rgba(22,163,74,.2);color:#4ade80}
+.dc-state-btn.s-drunk.active{border-color:var(--drunk-drunk);background:rgba(217,119,6,.2);color:#fbbf24}
+.dc-state-btn.s-wasted.active{border-color:var(--drunk-wasted);background:rgba(220,38,38,.2);color:#f87171}
+.dc-state-btn.s-blotto.active{border-color:var(--drunk-blotto);background:rgba(147,51,234,.2);color:#d8b4fe}
+.dc-effect{margin-top:.5rem;background:rgba(0,0,0,.25);border-radius:8px;padding:.45rem .6rem;font-family:var(--font-b);font-size:.76rem;color:var(--parchment-dark);line-height:1.45;min-height:40px}
+.dc-effect strong{font-weight:600}
+.dc-flask-row{display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:.6rem;background:rgba(0,0,0,.2);border-radius:8px;padding:.35rem .5rem}
+.dc-flask-label{font-family:var(--font-d);font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--parchment-dark);opacity:.65}
+.dc-flask-count{font-family:var(--font-d);font-size:.95rem;font-weight:900;color:var(--gold-bright);min-width:1.5ch;text-align:center}
+.dc-flask-btn{width:30px;height:30px;border-radius:50%;border:1px solid rgba(201,146,42,.35);background:rgba(255,255,255,.06);color:var(--gold-light);font-family:var(--font-d);font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.dc-flask-btn:active{background:rgba(201,146,42,.25)}
+.dc-drop-btn{width:100%;margin-top:.5rem;padding:.38rem;border-radius:7px;border:1px solid rgba(107,114,128,.3);background:rgba(107,114,128,.1);color:#9ca3af;font-family:var(--font-d);font-size:.6rem;font-weight:700;letter-spacing:.06em;cursor:pointer;text-align:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.dc-drop-btn:active{background:rgba(107,114,128,.25)}
+.dc-rules{margin-top:.55rem;background:rgba(0,0,0,.2);border-radius:8px;overflow:hidden}
+.dc-rules-head{padding:.32rem .55rem;font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--parchment-dark);opacity:.55;cursor:pointer;display:flex;align-items:center;justify-content:space-between;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.dc-rules-body{display:none;padding:.4rem .55rem;font-family:var(--font-b);font-size:.75rem;color:var(--parchment-dark);line-height:1.55;opacity:.8}
+.dc-rules-body.open{display:block}
+.dc-rules-body p{margin-bottom:.3rem}
+.dc-rules-body p:last-child{margin-bottom:0}
+
+/* ===== INSPIRATION ===== */
+.inspiration-toggle{display:flex;align-items:center;gap:.55rem;padding:.45rem;background:var(--navy);border:2px solid rgba(255,215,106,.25);border-radius:8px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color var(--dur-ui) var(--ease-out-cubic),background var(--dur-ui) var(--ease-out-cubic);touch-action:manipulation}
+.inspiration-toggle.active{border-color:var(--gold-bright);background:rgba(255,215,106,.1)}
+.inspiration-toggle .ii{font-size:1.3rem}
+.inspiration-toggle .it{font-family:var(--font-d);font-size:.62rem;font-weight:700;letter-spacing:.06em;color:var(--parchment-dark);transition:color var(--dur-ui) ease}
+.inspiration-toggle.active .it{color:var(--gold-bright)}
+
+/* ===== RESTS ===== */
+.rest-card{background:linear-gradient(135deg,var(--navy) 0,var(--navy-mid) 100%);border:2px solid rgba(201,146,42,.3);border-radius:12px;padding:.75rem;display:flex;flex-direction:column;gap:.5rem}
+.rest-label{font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-light);text-align:center}
+.rest-buttons{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.rest-btn{padding:.6rem .5rem;border:none;border-radius:8px;font-family:var(--font-d);font-size:.7rem;font-weight:700;letter-spacing:.05em;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform var(--dur-micro) ease,opacity var(--dur-micro) ease;display:flex;flex-direction:column;align-items:center;gap:.2rem;touch-action:manipulation}
+.rest-btn:active{transform:scale(0.95);opacity:.85}
+.rest-btn .rb-icon{font-size:1.4rem}
+.rest-btn .rb-label{font-size:.6rem;letter-spacing:.06em}
+.rest-btn .rb-desc{font-size:.52rem;opacity:.65;font-weight:400;font-family:var(--font-b);font-style:italic;letter-spacing:0}
+.rest-btn.short{background:rgba(42,107,94,.35);border:1px solid rgba(61,154,137,.5);color:#7dd8cc}
+.rest-btn.long{background:rgba(201,146,42,.2);border:1px solid rgba(201,146,42,.5);color:var(--gold-light)}
+.hd-row{display:flex;align-items:center;justify-content:center;gap:.4rem}
+.hd-btn{background:rgba(61,154,137,.2);border:1px solid rgba(61,154,137,.4);border-radius:6px;padding:.3rem .6rem;font-family:var(--font-d);font-size:.65rem;font-weight:700;color:#7dd8cc;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.hd-label{font-family:var(--font-b);font-style:italic;font-size:.72rem;color:var(--parchment-dark);opacity:.6}
+
+/* ===== LOOT ===== */
+.loot-code-row{display:flex;gap:.4rem;margin-bottom:.65rem}
+.loot-code-input{flex:1;background:var(--navy);border:1px solid rgba(201,146,42,.35);border-radius:8px;color:var(--white);font-family:var(--font-b);font-size:.85rem;padding:.4rem .6rem}
+.loot-code-input:focus{outline:none;border-color:var(--gold)}
+.loot-decode-btn{background:linear-gradient(135deg,var(--gold),var(--amber));border:none;border-radius:8px;padding:.4rem .75rem;font-family:var(--font-d);font-size:.65rem;font-weight:700;letter-spacing:.05em;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;white-space:nowrap}
+.loot-decode-btn:active{opacity:.85}
+.loot-items-list{display:flex;flex-direction:column;gap:.5rem}
+.loot-item-card{background:var(--navy);border:1px solid rgba(201,146,42,.25);border-radius:10px;padding:.55rem .7rem;position:relative;animation:loot-in var(--dur-modal) var(--ease-out-quart) both}
+@keyframes loot-in{from{opacity:0;transform:scale(0.96) translateY(4px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.loot-item-card.equipped-card{border-color:var(--gold-bright);background:linear-gradient(135deg,var(--navy) 0,rgba(201,146,42,.08) 100%)}
+.loot-item-header{display:flex;align-items:center;gap:.4rem;margin-bottom:.28rem}
+.loot-item-name{font-family:var(--font-d);font-size:.75rem;font-weight:700;color:var(--gold-light);flex:1}
+.rarity-badge{font-size:.5rem;font-family:var(--font-d);font-weight:700;border-radius:4px;padding:.07rem .3rem;letter-spacing:.05em}
+.rarity-badge.common{background:rgba(156,163,175,.2);color:#9ca3af;border:1px solid rgba(156,163,175,.3)}
+.rarity-badge.uncommon{background:rgba(34,197,94,.2);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+.rarity-badge.rare{background:rgba(96,165,250,.2);color:#93c5fd;border:1px solid rgba(96,165,250,.3)}
+.rarity-badge.very-rare{background:rgba(167,139,250,.2);color:#c4b5fd;border:1px solid rgba(167,139,250,.3)}
+.rarity-badge.legendary{background:rgba(251,191,36,.2);color:var(--gold-bright);border:1px solid rgba(251,191,36,.3)}
+.loot-item-desc{font-family:var(--font-b);font-size:.77rem;color:var(--parchment-dark);line-height:1.4;margin-bottom:.35rem}
+.loot-item-fx{font-family:var(--font-d);font-size:.62rem;font-weight:600;color:#a78bfa;letter-spacing:.03em;margin-bottom:.35rem;padding:.22rem .4rem;background:rgba(139,92,246,.1);border-radius:5px;border:1px solid rgba(139,92,246,.2)}
+.loot-item-fx.active-fx{color:var(--gold-bright);background:rgba(201,146,42,.12);border-color:rgba(201,146,42,.3)}
+.loot-item-actions{display:flex;gap:.35rem}
+.equip-btn{flex:1;padding:.32rem .5rem;border-radius:6px;font-family:var(--font-d);font-size:.62rem;font-weight:700;letter-spacing:.04em;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;border:none;transition:all .13s}
+.equip-btn.do-equip{background:linear-gradient(135deg,var(--sea),var(--sea-light));color:var(--white)}
+.equip-btn.do-unequip{background:rgba(201,146,42,.2);border:1px solid var(--gold);color:var(--gold-light)}
+.discard-btn{width:34px;height:34px;border-radius:6px;background:rgba(139,58,30,.25);border:1px solid rgba(139,58,30,.4);color:#e8956d;font-size:.85rem;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+.equipped-banner{position:absolute;top:6px;right:8px;font-size:.5rem;font-family:var(--font-d);font-weight:700;letter-spacing:.07em;color:var(--gold-bright);opacity:.9}
+.no-loot-hint{font-family:var(--font-b);font-style:italic;font-size:.8rem;color:var(--text-light);text-align:center;padding:.5rem 0;opacity:.65}
+
+/* ===== LOOT MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:800;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity var(--dur-ui) ease;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-panel{background:linear-gradient(180deg,var(--navy-light) 0,var(--navy) 100%);border:2px solid var(--gold);border-radius:20px;width:100%;max-width:420px;padding:1.25rem 1rem;transform:scale(.95) translateY(6px);transition:transform var(--dur-modal) var(--ease-out-quart);will-change:transform}
+.modal-overlay.open .modal-panel{transform:scale(1) translateY(0)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.modal-title{font-family:var(--font-d);font-size:1rem;font-weight:700;color:var(--gold-bright);letter-spacing:.06em}
+.modal-close{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;width:32px;height:32px;color:var(--parchment-dark);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+.modal-item-rarity{margin-bottom:.5rem}
+.modal-item-name{font-family:var(--font-d);font-size:1.3rem;font-weight:900;color:var(--gold-bright);margin-bottom:.35rem}
+.modal-item-type{font-family:var(--font-b);font-style:italic;font-size:.8rem;color:var(--parchment-dark);opacity:.6;margin-bottom:.6rem}
+.modal-item-desc{font-family:var(--font-b);font-size:.88rem;color:var(--parchment);line-height:1.5;margin-bottom:.65rem;border-left:3px solid var(--gold);padding-left:.6rem}
+.modal-item-fx-box{background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3);border-radius:8px;padding:.5rem .7rem;margin-bottom:.9rem}
+.modal-item-fx-label{font-family:var(--font-d);font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#a78bfa;margin-bottom:.25rem}
+.modal-item-fx-text{font-family:var(--font-d);font-size:.72rem;font-weight:600;color:#c4b5fd;line-height:1.4}
+.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.modal-btn{padding:.65rem;border:none;border-radius:10px;font-family:var(--font-d);font-size:.8rem;font-weight:700;letter-spacing:.06em;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.modal-btn.store{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:var(--parchment-dark)}
+.modal-btn.store:active{background:rgba(255,255,255,.16)}
+.modal-btn.equip{background:linear-gradient(135deg,var(--gold),var(--amber));color:var(--navy)}
+.modal-btn.equip:active{opacity:.85}
+
+/* ===== NOTES ===== */
+.notes-area{width:100%;min-height:75px;background:rgba(255,255,255,.5);border:1px solid rgba(139,90,43,.22);border-radius:6px;padding:.45rem;font-family:var(--font-b);font-size:.82rem;color:var(--text-dark);resize:vertical}
+.notes-area:focus{outline:none;border-color:var(--gold)}
+.traits-grid{display:flex;flex-direction:column;gap:.45rem}
+.trait-box{background:linear-gradient(135deg,rgba(42,107,94,.08) 0,transparent 100%);border:1px solid rgba(61,154,137,.18);border-radius:8px;padding:.45rem .65rem}
+.trait-label{font-family:var(--font-d);font-size:.55rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#7dd8cc;margin-bottom:.18rem}
+.trait-text{font-family:var(--font-b);font-style:italic;font-size:.8rem;color:var(--text-mid);line-height:1.4}
+.equipment-list{font-family:var(--font-b);font-size:.82rem;color:var(--text-mid);line-height:1.65}
+.equipment-list li{margin-left:1rem}
+.equipment-list li.special{color:var(--amber);font-weight:600}
+.divider{height:1px;background:linear-gradient(90deg,transparent,rgba(139,90,43,.22),transparent);margin:.2rem 0}
+.sheet-footer{text-align:center;padding:1rem;font-family:var(--font-b);font-style:italic;font-size:.72rem;color:var(--text-light);opacity:.5;background:var(--parchment)}
+
+/* ===== DICE ===== */
+.dice-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:900;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity var(--dur-ui) ease;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+.dice-overlay.open{opacity:1;pointer-events:all}
+.dice-panel{background:linear-gradient(180deg,var(--navy-light) 0,var(--navy) 100%);border:1px solid rgba(201,146,42,.35);border-radius:20px 20px 0 0;border-bottom:none;width:100%;padding:1rem .9rem calc(env(safe-area-inset-bottom) + .8rem);transform:translateY(100%);transition:transform var(--dur-modal) var(--ease-out-quart);max-height:92vh;overflow-y:auto}
+.dice-overlay.open .dice-panel{transform:translateY(0)}
+.dice-panel-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem}
+.dice-panel-title{font-family:var(--font-d);font-size:.85rem;font-weight:700;letter-spacing:.1em;color:var(--gold-light)}
+.dice-close{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;width:32px;height:32px;font-size:1rem;cursor:pointer;color:var(--parchment-dark);display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+.dice-tabs{display:flex;gap:.3rem;margin-bottom:.75rem}
+.dice-tab{flex:1;padding:.4rem;background:rgba(255,255,255,.06);border:1px solid rgba(201,146,42,.2);border-radius:7px;font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.05em;color:var(--parchment-dark);cursor:pointer;text-align:center;transition:background var(--dur-micro) ease,border-color var(--dur-micro) ease,color var(--dur-micro) ease;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.dice-tab.active{background:rgba(201,146,42,.2);border-color:var(--gold);color:var(--gold-light)}
+.dice-tab-content{display:none;animation:tab-in var(--dur-ui) var(--ease-out-quart)}
+@keyframes tab-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.dice-tab-content.active{display:block}
+.dice-qty-row{display:flex;align-items:center;gap:.3rem;margin-bottom:.55rem}
+.dice-qty-label{font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.06em;color:var(--parchment-dark);opacity:.65;text-transform:uppercase;margin-right:.1rem}
+.qty-btn{width:36px;height:36px;border-radius:8px;border:1px solid rgba(201,146,42,.35);background:rgba(255,255,255,.06);color:var(--parchment-dark);font-family:var(--font-d);font-weight:700;font-size:.82rem;cursor:pointer;transition:all .13s;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+.qty-btn.active{background:rgba(201,146,42,.25);border-color:var(--gold);color:var(--gold-bright)}
+.dice-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.35rem;margin-bottom:.55rem}
+.die-btn{aspect-ratio:1;border-radius:10px;border:1px solid rgba(201,146,42,.35);background:rgba(255,255,255,.06);color:var(--parchment-dark);font-family:var(--font-d);font-weight:700;font-size:.7rem;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;touch-action:manipulation;padding:.3rem}
+.die-btn:active,.die-btn.selected{background:rgba(201,146,42,.25);border-color:var(--gold);color:var(--gold-bright)}
+.die-btn.d20-btn{border-color:rgba(255,215,106,.5);color:var(--gold-bright)}
+.dice-mod-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem}
+.mod-label{font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.05em;color:var(--parchment-dark);opacity:.65;text-transform:uppercase}
+.mod-input{background:var(--navy-light);border:1px solid rgba(201,146,42,.35);border-radius:6px;color:var(--white);font-family:var(--font-d);font-size:.9rem;font-weight:600;text-align:center;width:60px;padding:.3rem;-webkit-appearance:none}
+.mod-input:focus{outline:none;border-color:var(--gold)}
+.adv-btns{display:flex;gap:.3rem;margin-left:auto}
+.adv-btn{padding:.3rem .5rem;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.04em;cursor:pointer;color:var(--parchment-dark);transition:all .13s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.adv-btn.adv.active{background:rgba(42,107,94,.35);border-color:var(--sea-light);color:#7dd8cc}
+.adv-btn.dis.active{background:rgba(139,58,30,.35);border-color:var(--rust);color:#e8956d}
+.roll-btn{width:100%;padding:.7rem;background:linear-gradient(135deg,var(--gold) 0,var(--amber) 100%);border:none;border-radius:10px;font-family:var(--font-d);font-size:.9rem;font-weight:900;letter-spacing:.12em;color:var(--navy);cursor:pointer;transition:transform var(--dur-micro) ease,opacity var(--dur-micro) ease;-webkit-tap-highlight-color:transparent;touch-action:manipulation;box-shadow:0 3px 12px rgba(201,146,42,.35)}
+.roll-btn:active{opacity:.85;transform:scale(.98)}
+.dice-result-area{text-align:center;padding:.75rem .5rem;min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem}
+.dice-result{font-family:var(--font-d);font-size:3.5rem;font-weight:900;color:var(--gold-bright);text-shadow:0 0 25px rgba(255,215,106,.5);line-height:1;letter-spacing:-.02em;will-change:transform}
+.dice-result.rolling{animation:tumble .08s linear infinite}
+.dice-result.nat20{color:#22c55e;text-shadow:0 0 25px rgba(34,197,94,.6)}
+.dice-result.nat1{color:#ef4444;text-shadow:0 0 25px rgba(239,68,68,.6)}
+.dice-result.settled{animation:settle 320ms var(--ease-out-quart)}
+@keyframes tumble{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes settle{0%{transform:scale(1.1)}55%{transform:scale(0.96)}100%{transform:scale(1)}}
+.dice-formula{font-family:var(--font-b);font-size:.75rem;color:var(--parchment-dark);opacity:.6}
+.dice-breakdown{font-family:var(--font-b);font-size:.72rem;color:var(--parchment-dark);opacity:.5;font-style:italic;max-width:260px;text-align:center}
+.dice-history-label{font-family:var(--font-d);font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--parchment-dark);opacity:.45;margin-bottom:.3rem}
+.dice-history-list{display:flex;flex-direction:column;gap:.18rem}
+.history-entry{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-b);font-size:.75rem;color:var(--parchment-dark);opacity:.55;padding:.15rem 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.history-entry:last-child{border-bottom:none}
+.history-entry .he-result{font-family:var(--font-d);font-weight:700;font-size:.8rem;color:var(--gold-light)}
+.quick-rolls-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.35rem;margin-bottom:.6rem}
+.qr-btn{background:var(--navy);border:1px solid rgba(201,146,42,.25);border-radius:8px;padding:.45rem .4rem;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:.12rem;touch-action:manipulation;min-height:52px;justify-content:center}
+.qr-btn:active{border-color:rgba(201,146,42,.6);background:rgba(201,146,42,.08)}
+.qr-label{font-family:var(--font-d);font-size:.62rem;font-weight:700;color:var(--gold-light);letter-spacing:.03em;text-align:center}
+.qr-formula{font-family:var(--font-b);font-style:italic;font-size:.65rem;color:var(--parchment-dark);opacity:.55}
+.qr-type-atk .qr-label{color:#7dd8cc}
+.qr-type-save .qr-label{color:#f9a8d4}
+.qr-type-init .qr-label{color:var(--gold-bright)}
+.qr-type-heal .qr-label{color:#4ade80}
+/* Saves tab */
+.sc-section-label{font-family:var(--font-d);font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--parchment-dark);opacity:.5;margin:.6rem 0 .35rem}
+.sc-section-label:first-child{margin-top:0}
+.sc-rolls-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.3rem;margin-bottom:.2rem}
+.sc-btn{background:var(--navy);border:1px solid rgba(201,146,42,.2);border-radius:8px;padding:.38rem .35rem;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s;display:flex;align-items:center;justify-content:space-between;gap:.25rem;touch-action:manipulation}
+.sc-btn:active{border-color:rgba(201,146,42,.5);background:rgba(201,146,42,.07)}
+.sc-name{font-family:var(--font-d);font-size:.58rem;font-weight:600;color:var(--parchment-dark);flex:1}
+.sc-val{font-family:var(--font-d);font-size:.72rem;font-weight:900;color:var(--gold-light)}
+.sc-val.pos{color:#7dd8cc}
+.sc-val.neg{color:#e8956d}
+.sc-prof-dot{width:7px;height:7px;border-radius:50%;border:1.5px solid var(--text-light);flex-shrink:0}
+.sc-prof-dot.prof{background:var(--gold);border-color:var(--amber)}
+
+#dice-fab{position:fixed;bottom:calc(env(safe-area-inset-bottom) + 16px);right:16px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--gold) 0,var(--amber) 100%);border:none;box-shadow:0 4px 16px rgba(201,146,42,.5),0 2px 6px rgba(0,0,0,.4);cursor:pointer;font-size:1.6rem;z-index:500;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:transform var(--dur-micro) ease,background var(--dur-ui) ease,border-color var(--dur-ui) ease;touch-action:manipulation;display:none;will-change:transform}
+#dice-fab.visible{display:flex}
+#dice-fab:active{transform:scale(.92)}
+#dice-fab.open{background:linear-gradient(135deg,var(--navy-light) 0,var(--navy) 100%);border:2px solid var(--gold)}
+
+#toast{position:fixed;bottom:calc(env(safe-area-inset-bottom) + 82px);left:50%;transform:translateX(-50%);z-index:1000;pointer-events:none}
+.toast-msg{background:var(--navy-light);border:1px solid rgba(201,146,42,.5);border-radius:10px;padding:.45rem .9rem;font-family:var(--font-d);font-size:.7rem;font-weight:700;letter-spacing:.05em;color:var(--gold-light);box-shadow:0 4px 16px rgba(0,0,0,.4);white-space:nowrap;animation:toastIn .2s ease,toastOut .3s ease 1.8s forwards}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateY(-4px)}}
+@keyframes modal-in{from{opacity:0;transform:scale(0.95) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes modal-out{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(0.96)}}
+
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--navy)}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px}
+@media(max-width:380px){.ability-grid{gap:.22rem}.ab-score{font-size:1.1rem}.hp-cur{font-size:2.4rem}.dice-result{font-size:3rem}}
+@media(hover:hover) and (pointer:fine){
+  .sel-card:hover{border-color:rgba(201,146,42,.5);transform:translateY(-1px)}
+  .weapon-row:hover{background:rgba(201,146,42,.06)}
+  .qr-btn:hover{border-color:rgba(201,146,42,.5)}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ SELECTION SCREEN ══════════════════ -->
+<div id="sel-screen">
+  <div class="sel-logo">
+    <div class="sel-logo-title">☠ The Curse of the Gilded Kraken ☠</div>
+    <div class="sel-logo-sub">Prekletstvo Zlatega Krakna · Level 5</div>
+  </div>
+  <div class="sel-prompt">⚓ Choose your character ⚓</div>
+  <div class="sel-grid">
+    <div class="sel-card" onclick="selectChar(0)">
+      <div class="sel-emoji">🎩</div>
+      <div class="sel-name">Marin "Tri Puta" Vukasović</div>
+      <div class="sel-class">Fighter 5 · Battle Master · Human</div>
+      <div class="sel-stats"><span class="sel-stat">HP 44</span><span class="sel-stat">AC 16</span></div>
+    </div>
+    <div class="sel-card" onclick="selectChar(1)">
+      <div class="sel-emoji">🔱</div>
+      <div class="sel-name">Vuk "Bledi" Senković</div>
+      <div class="sel-class">Warlock 5 · GOO · Tiefling</div>
+      <div class="sel-stats"><span class="sel-stat">HP 38</span><span class="sel-stat">AC 13</span></div>
+    </div>
+    <div class="sel-card" onclick="selectChar(2)">
+      <div class="sel-emoji">🔪</div>
+      <div class="sel-name">Pero "Prsti" Babić</div>
+      <div class="sel-class">Rogue 5 · Thief · Halfling</div>
+      <div class="sel-stats"><span class="sel-stat">HP 33</span><span class="sel-stat">AC 15</span></div>
+    </div>
+    <div class="sel-card" onclick="selectChar(3)">
+      <div class="sel-emoji">🎵</div>
+      <div class="sel-name">Zvonko "Val" Štimac</div>
+      <div class="sel-class">Bard 5 · Valor · Half-Elf</div>
+      <div class="sel-stats"><span class="sel-stat">HP 33</span><span class="sel-stat">AC 15</span></div>
+    </div>
+    <div class="sel-card" onclick="selectChar(4)">
+      <div class="sel-emoji">🎣</div>
+      <div class="sel-name">Bogdan "Pijani" Ribič</div>
+      <div class="sel-class">Monk 5 · Drunken Master · Dwarf</div>
+      <div class="sel-stats"><span class="sel-stat">HP 38</span><span class="sel-stat">AC 16</span></div>
+    </div>
+    <div class="sel-card" onclick="selectChar(5)">
+      <div class="sel-emoji">⚔️</div>
+      <div class="sel-name">Mirnes "Vitez" Selimović</div>
+      <div class="sel-class">Paladin 5 · Oath of Vengeance · Human</div>
+      <div class="sel-stats"><span class="sel-stat">HP 44</span><span class="sel-stat">AC 20</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ SHEET SCREEN ══════════════════ -->
+<div id="sheet-screen">
+  <div class="sheet-top-bar">
+    <button class="back-btn" onclick="backToSelection()">⟵ Characters</button>
+    <span class="topbar-char-name" id="topbar-name">—</span>
+    <div class="topbar-conds" id="topbar-conds"></div>
+  </div>
+  <div id="sheet-content"></div>
+</div>
+
+<!-- ══════════════════ DICE OVERLAY ══════════════════ -->
+<div class="dice-overlay" id="dice-overlay" onclick="overlayClick(event)">
+  <div class="dice-panel" id="dice-panel">
+    <div class="dice-panel-hdr">
+      <div class="dice-panel-title">🎲 Dice Roller</div>
+      <button class="dice-close" onclick="closeDice()">✕</button>
+    </div>
+    <div class="dice-tabs">
+      <div class="dice-tab active" id="dtab-custom" onclick="switchDiceTab('custom')">Custom</div>
+      <div class="dice-tab" id="dtab-quick" onclick="switchDiceTab('quick')">Quick</div>
+      <div class="dice-tab" id="dtab-saves" onclick="switchDiceTab('saves')">Saves</div>
+    </div>
+    <div class="dice-tab-content active" id="dcontent-custom">
+      <div class="dice-qty-row">
+        <span class="dice-qty-label">Qty:</span>
+        <div class="qty-btn active" id="qty-1" onclick="setQty(1)">1</div>
+        <div class="qty-btn" id="qty-2" onclick="setQty(2)">2</div>
+        <div class="qty-btn" id="qty-3" onclick="setQty(3)">3</div>
+        <div class="qty-btn" id="qty-4" onclick="setQty(4)">4</div>
+        <div class="qty-btn" id="qty-5" onclick="setQty(5)">5</div>
+        <div class="qty-btn" id="qty-6" onclick="setQty(6)">6</div>
+      </div>
+      <div class="dice-grid">
+        <div class="die-btn" onclick="selectDie(4)">d4</div>
+        <div class="die-btn" onclick="selectDie(6)">d6</div>
+        <div class="die-btn" onclick="selectDie(8)">d8</div>
+        <div class="die-btn" onclick="selectDie(10)">d10</div>
+        <div class="die-btn" onclick="selectDie(12)">d12</div>
+        <div class="die-btn d20-btn" onclick="selectDie(20)">d20</div>
+        <div class="die-btn" onclick="selectDie(100)">d%</div>
+      </div>
+      <div class="dice-mod-row">
+        <span class="mod-label">Mod:</span>
+        <input class="mod-input" id="mod-input" type="number" value="0" inputmode="numeric">
+        <div class="adv-btns" id="adv-btns" style="display:none">
+          <div class="adv-btn adv" id="adv-btn" onclick="toggleAdvantage('adv')">ADV</div>
+          <div class="adv-btn dis" id="dis-btn" onclick="toggleAdvantage('dis')">DIS</div>
+        </div>
+      </div>
+      <button class="roll-btn" id="main-roll-btn" onclick="doRoll()" disabled>Choose a die ↑</button>
+    </div>
+    <div class="dice-tab-content" id="dcontent-quick">
+      <div style="font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.08em;color:var(--parchment-dark);opacity:.5;margin-bottom:.45rem;text-transform:uppercase" id="qr-char-label">—</div>
+      <div class="quick-rolls-grid" id="quick-rolls-grid"></div>
+    </div>
+    <div class="dice-tab-content" id="dcontent-saves">
+      <div style="font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.08em;color:var(--parchment-dark);opacity:.5;margin-bottom:.45rem;text-transform:uppercase" id="sc-char-label">—</div>
+      <div id="sc-content"></div>
+    </div>
+    <div class="dice-result-area">
+      <div class="dice-result" id="dice-result">—</div>
+      <div class="dice-formula" id="dice-formula"></div>
+      <div class="dice-breakdown" id="dice-breakdown"></div>
+    </div>
+    <div class="dice-history-label">Recent Rolls</div>
+    <div class="dice-history-list" id="dice-history-list"><div style="font-family:var(--font-b);font-style:italic;font-size:.72rem;color:var(--parchment-dark);opacity:.35">No rolls yet</div></div>
+  </div>
+</div>
+
+<button id="dice-fab" onclick="toggleDice()">🎲</button>
+<div id="toast"></div>
+
+<!-- ══════════════════ LOOT MODAL ══════════════════ -->
+<div class="modal-overlay" id="loot-modal" onclick="lootModalBg(event)">
+  <div class="modal-panel" id="loot-modal-panel">
+    <div class="modal-header">
+      <div class="modal-title">🎁 Item Found!</div>
+      <button class="modal-close" onclick="closeLootModal()">✕</button>
+    </div>
+    <div id="loot-modal-body"></div>
+    <div class="modal-actions">
+      <button class="modal-btn store" onclick="confirmLoot('store')">📦 Store</button>
+      <button class="modal-btn equip" onclick="confirmLoot('equip')">⚔️ Equip Now</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════
+// CHARACTER DATA
+// ═══════════════════════════════════════════════════
+const CHARS = [
+  // 0: Marin
+  {
+    id:0, emoji:'🎩', name:'Marin "Tri Puta" Vukasović', sub:'',
+    tags:[{l:'Fighter 5'},{l:'Battle Master'},{l:'Human',r:'race'},{l:'Sailor'},{l:'Chaotic Neutral',r:'align'}],
+    flavor:'Three shipwrecks. Two kraken attacks (he claims). One very bad marriage. The hat gives "+2 to everything" and he has not been persuaded otherwise.',
+    maxHp:44, baseAc:16, initiative:'+2', speed:'30ft', profBonus:'+3',
+    spellSave:'—', spellAtk:'—', passivePerc:12, darkvision:false,
+    stats:[{l:'STR',s:16,m:'+3'},{l:'DEX',s:14,m:'+2'},{l:'CON',s:14,m:'+2'},{l:'INT',s:10,m:'+0'},{l:'WIS',s:10,m:'+0'},{l:'CHA',s:14,m:'+2'}],
+    saves:[
+      {n:'Strength',m:'+5',prof:true},{n:'Dexterity',m:'+2',prof:false},{n:'Constitution',m:'+4',prof:true},
+      {n:'Intelligence',m:'+0',prof:false},{n:'Wisdom',m:'+0',prof:false},{n:'Charisma',m:'+2',prof:false}
+    ],
+    abilityChecks:[
+      {n:'STR Check',m:'+3'},{n:'DEX Check',m:'+2'},{n:'CON Check',m:'+2'},
+      {n:'INT Check',m:'+0'},{n:'WIS Check',m:'+0'},{n:'CHA Check',m:'+2'}
+    ],
+    skills:[
+      {n:'Athletics',a:'STR',m:'+5',e:false,prof:true},{n:'Intimidation',a:'CHA',m:'+4',e:false,prof:true},
+      {n:'History',a:'INT',m:'+2',e:false,prof:true},{n:'Perception',a:'WIS',m:'+2',e:false,prof:true},
+      {n:'Persuasion',a:'CHA',m:'+4',e:false,prof:true}
+    ],
+    baseWeapons:[
+      {id:'rapier',n:'Rapier',hit:5,dmg:'1d8+5',note:'Dueling (+2). Finesse.',atkFm:'1d20+5',dmgFm:'1d8+5'},
+      {id:'dagger',n:'Dagger ×2',hit:5,dmg:'1d4+3',note:'Light, Finesse. Thrown 20/60ft.',atkFm:'1d20+5',dmgFm:'1d4+3'},
+      {id:'pistol',n:'Flintlock Pistol',hit:4,dmg:'1d6+2',note:'Range 30/90ft. Loading — one shot per turn.',atkFm:'1d20+4',dmgFm:'1d6+2'},
+    ],
+    shortRestRes:['sd','as','sw'],
+    pips:{sd:[false,false,false,false],as:[false],sw:[false]},
+    hitDie:'1d10', hdMod:2,
+    quickRolls:[
+      {l:'Rapier Atk',f:'1d20+5',t:'atk'},{l:'Rapier Dmg',f:'1d8+5',t:'dmg'},
+      {l:'Sup Die',f:'1d8',t:'dice'},{l:'Initiative',f:'1d20+2',t:'init'},
+      {l:'2nd Wind',f:'1d10+5',t:'heal'},{l:'STR Save',f:'1d20+5',t:'save'},
+    ],
+  },
+  // 1: Vuk
+  {
+    id:1, emoji:'🔱', name:'Vuk "Bledi" Senković', sub:'',
+    tags:[{l:'Warlock 5'},{l:'Great Old One'},{l:'Pact of the Blade'},{l:'Tiefling',r:'race'},{l:'Hermit'},{l:'Chaotic Neutral',r:'align'}],
+    flavor:'Made a pact with something old and wet at the bottom of the ocean. Horns are slightly coral-encrusted. He pretends not to notice.',
+    maxHp:38, baseAc:13, initiative:'+2', speed:'30ft', profBonus:'+3',
+    spellSave:'14', spellAtk:'+6', passivePerc:13, darkvision:true,
+    stats:[{l:'STR',s:10,m:'+0'},{l:'DEX',s:14,m:'+2'},{l:'CON',s:14,m:'+2'},{l:'INT',s:12,m:'+1'},{l:'WIS',s:12,m:'+1'},{l:'CHA',s:18,m:'+4'}],
+    saves:[
+      {n:'Strength',m:'+0',prof:false},{n:'Dexterity',m:'+2',prof:false},{n:'Constitution',m:'+2',prof:false},
+      {n:'Intelligence',m:'+1',prof:false},{n:'Wisdom',m:'+3',prof:true},{n:'Charisma',m:'+6',prof:true}
+    ],
+    abilityChecks:[
+      {n:'STR Check',m:'+0'},{n:'DEX Check',m:'+2'},{n:'CON Check',m:'+2'},
+      {n:'INT Check',m:'+1'},{n:'WIS Check',m:'+1'},{n:'CHA Check',m:'+4'}
+    ],
+    skills:[
+      {n:'Arcana',a:'INT',m:'+3',e:false,prof:true},{n:'Deception',a:'CHA',m:'+6',e:false,prof:true},
+      {n:'History',a:'INT',m:'+3',e:false,prof:true},{n:'Intimidation',a:'CHA',m:'+6',e:false,prof:true},
+      {n:'Perception',a:'WIS',m:'+3',e:false,prof:true}
+    ],
+    baseWeapons:[
+      {id:'trident',n:'Pact Trident (Magical)',hit:6,dmg:'1d6+4',note:'Conjured. Reappears as bonus action.',atkFm:'1d20+6',dmgFm:'1d6+4'},
+      {id:'eb',n:'Eldritch Blast',hit:6,dmg:'1d10+4 ×2',note:'2 beams. 120ft. Agonizing Blast +CHA.',atkFm:'1d20+6',dmgFm:'1d10+4'},
+    ],
+    shortRestRes:['ws'],
+    pips:{ws:[false,false]},
+    hitDie:'1d8', hdMod:2,
+    quickRolls:[
+      {l:'EB Atk',f:'1d20+6',t:'atk'},{l:'EB Dmg',f:'1d10+4',t:'dmg'},
+      {l:'Trident Atk',f:'1d20+6',t:'atk'},{l:'Trident Dmg',f:'1d6+4',t:'dmg'},
+      {l:'Hex Dmg',f:'1d6',t:'dmg'},{l:'Initiative',f:'1d20+2',t:'init'},
+    ],
+  },
+  // 2: Pero
+  {
+    id:2, emoji:'🔪', name:'Pero "Prsti" Babić', sub:'',
+    tags:[{l:'Rogue 5'},{l:'Thief'},{l:'Halfling',r:'race'},{l:'Urchin'},{l:'Chaotic Good',r:'align'}],
+    flavor:"Looks exactly like someone's sweet grandfather. Is not. His knives have names. They have personalities. Big Carl has opinions.",
+    maxHp:33, baseAc:15, initiative:'+4', speed:'25ft', profBonus:'+3',
+    spellSave:'—', spellAtk:'—', passivePerc:18, darkvision:false,
+    stats:[{l:'STR',s:8,m:'−1'},{l:'DEX',s:18,m:'+4'},{l:'CON',s:12,m:'+1'},{l:'INT',s:14,m:'+2'},{l:'WIS',s:14,m:'+2'},{l:'CHA',s:12,m:'+1'}],
+    saves:[
+      {n:'Strength',m:'−1',prof:false},{n:'Dexterity',m:'+6',prof:true},{n:'Constitution',m:'+1',prof:false},
+      {n:'Intelligence',m:'+4',prof:true},{n:'Wisdom',m:'+2',prof:false},{n:'Charisma',m:'+1',prof:false}
+    ],
+    abilityChecks:[
+      {n:'STR Check',m:'−1'},{n:'DEX Check',m:'+4'},{n:'CON Check',m:'+1'},
+      {n:'INT Check',m:'+2'},{n:'WIS Check',m:'+2'},{n:'CHA Check',m:'+1'}
+    ],
+    skills:[
+      {n:'Acrobatics',a:'DEX',m:'+6',e:false,prof:true},{n:'Deception',a:'CHA',m:'+3',e:false,prof:true},
+      {n:'Perception ★',a:'WIS',m:'+6',e:true,prof:true},{n:'Sleight of Hand ★',a:'DEX',m:'+8',e:true,prof:true},
+      {n:'Stealth ★',a:'DEX',m:'+8',e:true,prof:true},{n:'Thieves\' Tools ★',a:'DEX',m:'+8',e:true,prof:true}
+    ],
+    baseWeapons:[
+      {id:'shortsword',n:'Shortsword ×2',hit:6,dmg:'1d6+4',note:'TWF: off-hand as bonus action.',atkFm:'1d20+6',dmgFm:'1d6+4'},
+      {id:'sneak',n:'Sneak Attack',hit:0,dmg:'+3d6',note:'Once/turn. Advantage OR ally within 5ft.',atkFm:'',dmgFm:'3d6'},
+      {id:'dagger',n:'Dagger ×4',hit:6,dmg:'1d4+4',note:'Marta · Gregor · The Quiet One · Señora Punta',atkFm:'1d20+6',dmgFm:'1d4+4'},
+      {id:'pistol2',n:'Flintlock Pistol',hit:6,dmg:'1d6+4',note:'30/90ft. Loading. Big Carl &amp; Steve also carry one each.',atkFm:'1d20+6',dmgFm:'1d6+4'},
+    ],
+    shortRestRes:[],
+    pips:{},
+    hitDie:'1d8', hdMod:1,
+    quickRolls:[
+      {l:'Shortsword Atk',f:'1d20+6',t:'atk'},{l:'Shortsword Dmg',f:'1d6+4',t:'dmg'},
+      {l:'Sneak Atk',f:'3d6',t:'dmg'},{l:'Initiative',f:'1d20+4',t:'init'},
+      {l:'DEX Save',f:'1d20+6',t:'save'},{l:'Stealth',f:'1d20+8',t:'skill'},
+    ],
+  },
+  // 3: Zvonko
+  {
+    id:3, emoji:'🎵', name:'Zvonko "Val" Štimac', sub:'',
+    tags:[{l:'Bard 5'},{l:'College of Valor'},{l:'Half-Elf',r:'race'},{l:'Entertainer'},{l:'Neutral Good',r:'align'}],
+    flavor:'The universe finds him too entertaining to kill. Will compose a šanty about this exact moment. Information accurate. Timing never appropriate.',
+    maxHp:33, baseAc:15, initiative:'+2', speed:'30ft', profBonus:'+3',
+    spellSave:'14', spellAtk:'+6', passivePerc:15, darkvision:true,
+    stats:[{l:'STR',s:10,m:'+0'},{l:'DEX',s:14,m:'+2'},{l:'CON',s:12,m:'+1'},{l:'INT',s:14,m:'+2'},{l:'WIS',s:12,m:'+1'},{l:'CHA',s:18,m:'+4'}],
+    saves:[
+      {n:'Strength',m:'+0',prof:false},{n:'Dexterity',m:'+4',prof:true},{n:'Constitution',m:'+1',prof:false},
+      {n:'Intelligence',m:'+2',prof:false},{n:'Wisdom',m:'+1',prof:false},{n:'Charisma',m:'+6',prof:true}
+    ],
+    abilityChecks:[
+      {n:'STR Check',m:'+0'},{n:'DEX Check',m:'+2'},{n:'CON Check',m:'+1'},
+      {n:'INT Check',m:'+2'},{n:'WIS Check',m:'+1'},{n:'CHA Check',m:'+4'}
+    ],
+    skills:[
+      {n:'Athletics',a:'STR',m:'+2',e:false,prof:true},{n:'History',a:'INT',m:'+6',e:false,prof:true},
+      {n:'Insight',a:'WIS',m:'+3',e:false,prof:true},{n:'Perception',a:'WIS',m:'+5',e:false,prof:true},
+      {n:'Performance',a:'CHA',m:'+8',e:false,prof:true},{n:'Persuasion',a:'CHA',m:'+8',e:false,prof:true}
+    ],
+    baseWeapons:[
+      {id:'rapier3',n:'Rapier',hit:4,dmg:'1d8+2',note:'Finesse.',atkFm:'1d20+4',dmgFm:'1d8+2'},
+      {id:'pistol3',n:'Flintlock Pistol',hit:4,dmg:'1d6+2',note:'Range 30/90ft. Loading — one shot per turn.',atkFm:'1d20+4',dmgFm:'1d6+2'},
+      {id:'mockery',n:'Vicious Mockery',hit:0,dmg:'1d4 psy',note:'Cantrip. 60ft. Fail WIS DC14: DisAdv next attack.',atkFm:'',dmgFm:'1d4'},
+    ],
+    shortRestRes:['bi'],
+    pips:{bi:[false,false,false,false],s1:[false,false,false,false],s2:[false,false,false],s3:[false,false]},
+    hitDie:'1d8', hdMod:1,
+    quickRolls:[
+      {l:'Rapier Atk',f:'1d20+4',t:'atk'},{l:'Rapier Dmg',f:'1d8+2',t:'dmg'},
+      {l:'Bard Insp',f:'1d8',t:'dice'},{l:'Initiative',f:'1d20+2',t:'init'},
+      {l:'Healing Word',f:'1d4+4',t:'heal'},{l:'Shatter Dmg',f:'3d8',t:'dmg'},
+    ],
+  },
+  // 4: Bogdan
+  {
+    id:4, emoji:'🎣', name:'Bogdan "Pijani" Ribič', sub:'',
+    tags:[{l:'Monk 5'},{l:'Drunken Master'},{l:'Dwarf',r:'race'},{l:'Sailor'},{l:'Chaotic Neutral',r:'align'}],
+    flavor:'"God\'s Gift to Fishing." Hasn\'t caught a fish in three years. Excellent at hitting things with the pole.',
+    maxHp:38, baseAc:16, initiative:'+3', speed:'35ft', profBonus:'+3',
+    spellSave:'—', spellAtk:'—', passivePerc:16, darkvision:true,
+    stats:[{l:'STR',s:12,m:'+1'},{l:'DEX',s:16,m:'+3'},{l:'CON',s:14,m:'+2'},{l:'INT',s:8,m:'−1'},{l:'WIS',s:16,m:'+3'},{l:'CHA',s:10,m:'+0'}],
+    saves:[
+      {n:'Strength',m:'+4',prof:true},{n:'Dexterity',m:'+6',prof:true},{n:'Constitution',m:'+2',prof:false},
+      {n:'Intelligence',m:'−1',prof:false},{n:'Wisdom',m:'+3',prof:false},{n:'Charisma',m:'+0',prof:false}
+    ],
+    abilityChecks:[
+      {n:'STR Check',m:'+1'},{n:'DEX Check',m:'+3'},{n:'CON Check',m:'+2'},
+      {n:'INT Check',m:'−1'},{n:'WIS Check',m:'+3'},{n:'CHA Check',m:'+0'}
+    ],
+    skills:[
+      {n:'Athletics',a:'STR',m:'+4',e:false,prof:true},{n:'Acrobatics',a:'DEX',m:'+6',e:false,prof:true},
+      {n:'Perception',a:'WIS',m:'+6',e:false,prof:true},{n:'Survival',a:'WIS',m:'+6',e:false,prof:true},
+      {n:'Performance',a:'CHA',m:'+3',e:false,prof:true}
+    ],
+    baseWeapons:[
+      {id:'pole',n:'"Vesna" (Fishing Pole)',hit:6,dmg:'1d8+3',note:'Quarterstaff. Versatile. She has feelings.',atkFm:'1d20+6',dmgFm:'1d8+3'},
+      {id:'unarmed',n:'Unarmed Strike',hit:6,dmg:'1d6+3',note:'Martial Arts die. Or just headbutt.',atkFm:'1d20+6',dmgFm:'1d6+3'},
+    ],
+    shortRestRes:['ki'],
+    pips:{ki:[false,false,false,false,false]},
+    hitDie:'1d8', hdMod:2,
+    quickRolls:[
+      {l:'Pole Atk',f:'1d20+6',t:'atk'},{l:'Pole Dmg',f:'1d8+3',t:'dmg'},
+      {l:'Unarmed Atk',f:'1d20+6',t:'atk'},{l:'Unarmed Dmg',f:'1d6+3',t:'dmg'},
+      {l:'Initiative',f:'1d20+3',t:'init'},{l:'STR Save',f:'1d20+4',t:'save'},
+    ],
+  },
+  // 5: Mirnes
+  {
+    id:5, emoji:'⚔️', name:'Mirnes "Vitez" Selimović', sub:'',
+    tags:[{l:'Paladin 5'},{l:'Oath of Vengeance'},{l:'Human',r:'race'},{l:'Soldier'},{l:'Lawful Neutral',r:'align'}],
+    flavor:'"I formally object to this entire situation. I will be participating in it nonetheless." Full plate armour. On a pirate ship. He has made his peace with this.',
+    maxHp:44, baseAc:20, initiative:'+0', speed:'30ft', profBonus:'+3',
+    spellSave:'14', spellAtk:'+6', passivePerc:11, darkvision:false,
+    stats:[{l:'STR',s:18,m:'+4'},{l:'DEX',s:10,m:'+0'},{l:'CON',s:14,m:'+2'},{l:'INT',s:10,m:'+0'},{l:'WIS',s:12,m:'+1'},{l:'CHA',s:16,m:'+3'}],
+    saves:[
+      {n:'Strength',m:'+4',prof:false},{n:'Dexterity',m:'+0',prof:false},{n:'Constitution',m:'+2',prof:false},
+      {n:'Intelligence',m:'+0',prof:false},{n:'Wisdom',m:'+4',prof:true},{n:'Charisma',m:'+6',prof:true}
+    ],
+    abilityChecks:[
+      {n:'STR Check',m:'+4'},{n:'DEX Check',m:'+0'},{n:'CON Check',m:'+2'},
+      {n:'INT Check',m:'+0'},{n:'WIS Check',m:'+1'},{n:'CHA Check',m:'+3'}
+    ],
+    skills:[
+      {n:'Athletics',a:'STR',m:'+7',e:false,prof:true},{n:'Intimidation',a:'CHA',m:'+6',e:false,prof:true},
+      {n:'Persuasion',a:'CHA',m:'+6',e:false,prof:true},{n:'Religion',a:'INT',m:'+3',e:false,prof:true}
+    ],
+    baseWeapons:[
+      {id:'longsword',n:'Longsword',hit:7,dmg:'1d8+6',note:'Dueling style (+2 dmg). Shield in off-hand.',atkFm:'1d20+7',dmgFm:'1d8+6'},
+      {id:'javelin',n:'Javelin ×5',hit:7,dmg:'1d6+4',note:'Thrown 30/120ft.',atkFm:'1d20+7',dmgFm:'1d6+4'},
+      {id:'smite',n:'Divine Smite',hit:0,dmg:'2d8 necrotic',note:'On hit: expend slot. 1st=2d8, 2nd=3d8.',atkFm:'',dmgFm:'2d8'},
+    ],
+    shortRestRes:['cd'],
+    pips:{cd:[false],s1:[false,false,false,false],s2:[false,false]},
+    hitDie:'1d10', hdMod:2,
+    quickRolls:[
+      {l:'Longsword Atk',f:'1d20+7',t:'atk'},{l:'Longsword Dmg',f:'1d8+6',t:'dmg'},
+      {l:'Divine Smite',f:'2d8',t:'dmg'},{l:'Initiative',f:'1d20+0',t:'init'},
+      {l:'WIS Save',f:'1d20+4',t:'save'},{l:'CHA Save',f:'1d20+6',t:'save'},
+    ],
+  },
+];
+
+const CHAR_NAMES = CHARS.map(c => c.name.split(' ')[0] + (c.id===4?' "Pijani"':''));
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+function defaultState() {
+  return {
+    v:4, selectedChar:null,
+    chars:[0,1,2,3,4,5].map(i=>({
+      hp:CHARS[i].maxHp, tempHp:0, inspiration:false,
+      ds:{s:[false,false,false],f:[false,false,false]},
+      conditions:[], concentration:'', exhaustion:0, notes:'',
+      pips:JSON.parse(JSON.stringify(CHARS[i].pips)),
+      loot:[], drinks:1
+    })),
+    history:[]
+  };
+}
+let S;
+try{const r=localStorage.getItem('gk3');S=r?JSON.parse(r):defaultState();if(!S.v||S.v<4)S=defaultState();}catch(e){S=defaultState();}
+function save(){try{localStorage.setItem('gk3',JSON.stringify(S));}catch(e){}}
+
+// ═══════════════════════════════════════════════════
+// SELECTION SCREEN
+// ═══════════════════════════════════════════════════
+function selectChar(idx) {
+  S.selectedChar = idx;
+  save();
+  const sel = document.getElementById('sel-screen');
+  sel.style.opacity = '0';
+  sel.style.transition = 'opacity 150ms ease';
+  setTimeout(() => {
+    sel.style.display = 'none';
+    sel.style.opacity = '';
+    sel.style.transition = '';
+    const ss = document.getElementById('sheet-screen');
+    ss.style.display = 'block';
+    ss.style.opacity = '0';
+    document.getElementById('dice-fab').classList.add('visible');
+    renderSheet(idx);
+    restoreChar(idx);
+    updateTopbar(idx);
+    requestAnimationFrame(() => {
+      ss.style.transition = 'opacity 200ms ease';
+      ss.style.opacity = '1';
+      setTimeout(() => { ss.style.transition = ''; ss.style.opacity = ''; }, 210);
+    });
+  }, 150);
+}
+function backToSelection() {
+  document.getElementById('sheet-screen').style.display = 'none';
+  document.getElementById('sel-screen').style.display = 'flex';
+  document.getElementById('dice-fab').classList.remove('visible');
+}
+function init() {
+  if (S.selectedChar !== null) { selectChar(S.selectedChar); }
+  renderHistory();
+}
+
+// ═══════════════════════════════════════════════════
+// SHEET RENDERING
+// ═══════════════════════════════════════════════════
+function renderSheet(i) {
+  const ch = CHARS[i];
+  const st = S.chars[i];
+  document.getElementById('sheet-content').innerHTML = buildSheetHTML(i);
+}
+
+function buildSheetHTML(i) {
+  const ch = CHARS[i];
+  const tagsHtml = ch.tags.map(t=>`<span class="tag${t.r?' '+t.r:''}">${t.l}</span>`).join('');
+  return `
+<div class="char-header">
+  <div class="char-name-row">
+    <div class="char-emoji">${ch.emoji}</div>
+    <div class="char-name-block">
+      <div class="char-name">${ch.name}${ch.sub?`<small>${ch.sub}</small>`:''}</div>
+      <div class="char-tags">${tagsHtml}</div>
+    </div>
+  </div>
+  <div class="char-flavor">${ch.flavor}</div>
+</div>
+<div class="char-content">
+  ${buildCombatSection(i)}
+  ${buildConditionsSection(i)}
+  ${buildAbilitiesSection(i)}
+  ${buildSavesSection(i)}
+  ${buildResourcesSection(i)}
+  ${buildWeaponsSection(i)}
+  ${buildFeaturesSection(i)}
+  ${buildSpellsSection(i)}
+  ${i===4?buildDutchCourageSection():''}
+  ${buildLootSection(i)}
+  ${buildEquipmentSection(i)}
+  ${buildRestSection(i)}
+</div>
+<div class="sheet-footer">${ch.name}${ch.sub?' · '+ch.sub:''} · ${ch.tags[0].l}</div>
+`;
+}
+
+function buildCombatSection(i) {
+  const ch = CHARS[i];
+  const eff = getEffective(i);
+  const st = S.chars[i];
+  const hpPct = st.hp / ch.maxHp;
+  const hpClass = hpPct <= .25 ? 'danger' : hpPct <= .5 ? 'warning' : '';
+  const maxHpDisplay = eff.maxHp !== ch.maxHp ? `<span style="color:var(--gold-bright)">${eff.maxHp}</span>` : ch.maxHp;
+  return `
+<div class="section-card"><div class="section-head" onclick="toggleSection(this)">⚔️ &nbsp;Combat <span class="chv">▾</span></div>
+<div class="section-body">
+<div class="hp-tracker">
+  <div class="hp-lbl">⚔ Hit Points</div>
+  <div class="hp-display"><div class="hp-cur ${hpClass}" id="hp-cur">${st.hp}</div><div class="hp-div">/</div><div class="hp-max" id="hp-max">${maxHpDisplay}</div></div>
+  <div class="hp-controls">
+    <div class="hp-input-row">
+      <input class="hp-input" id="hp-in" type="number" min="0" placeholder="Amt" inputmode="numeric">
+      <button class="hp-btn heal" onclick="changeHP('heal')">+ Heal</button>
+      <button class="hp-btn dmg" onclick="changeHP('dmg')">− Dmg</button>
+    </div>
+    <button class="hp-btn reset" onclick="resetHP()">↺ Reset</button>
+  </div>
+  <div class="temp-hp-row"><span>Temp HP:</span><input class="thp-input" id="thp" type="number" min="0" value="${st.tempHp||0}" inputmode="numeric" onchange="saveTHP(this.value)"></div>
+</div>
+<div style="height:.6rem"></div>
+<div class="combat-grid" id="combat-grid">${buildCombatGrid(i, eff)}</div>
+<div style="height:.65rem"></div>
+<div class="death-saves" id="ds">
+  <div class="ds-group"><div class="ds-label">Successes</div><div class="ds-pips">
+    <div class="ds-pip success ${st.ds.s[0]?'filled':''}" onclick="toggleDS('s',0)"></div>
+    <div class="ds-pip success ${st.ds.s[1]?'filled':''}" onclick="toggleDS('s',1)"></div>
+    <div class="ds-pip success ${st.ds.s[2]?'filled':''}" onclick="toggleDS('s',2)"></div>
+  </div></div>
+  <div class="ds-group"><div class="ds-label">Failures</div><div class="ds-pips">
+    <div class="ds-pip failure ${st.ds.f[0]?'filled':''}" onclick="toggleDS('f',0)"></div>
+    <div class="ds-pip failure ${st.ds.f[1]?'filled':''}" onclick="toggleDS('f',1)"></div>
+    <div class="ds-pip failure ${st.ds.f[2]?'filled':''}" onclick="toggleDS('f',2)"></div>
+  </div></div>
+</div>
+</div></div>`;
+}
+
+function buildCombatGrid(i, eff) {
+  const ch = CHARS[i];
+  const acMod = eff.acBonus > 0 ? `<span class="stat-mod-badge">+${eff.acBonus}✦</span>` : '';
+  const extra = i===1?'<div class="stat-box"><div class="stat-label">Darkvision</div><div class="stat-value sm">120ft</div></div>':'';
+  const extra2 = i===4?'<div class="stat-box"><div class="stat-label">Darkvision</div><div class="stat-value sm">60ft</div></div>':'';
+  return `
+    <div class="stat-box">${acMod}<div class="stat-label">Armor Class</div><div class="stat-value" id="stat-ac">${eff.ac}</div></div>
+    <div class="stat-box"><div class="stat-label">Initiative</div><div class="stat-value">${ch.initiative}</div></div>
+    <div class="stat-box"><div class="stat-label">Speed</div><div class="stat-value">${ch.speed}</div></div>
+    <div class="stat-box"><div class="stat-label">Prof Bonus</div><div class="stat-value">${ch.profBonus}</div></div>
+    <div class="stat-box"><div class="stat-label">Passive Perc</div><div class="stat-value">${ch.passivePerc}</div></div>
+    <div class="stat-box"><div class="stat-label">Spell Save</div><div class="stat-value sm" id="stat-ss">${eff.spellSave||ch.spellSave}</div></div>
+    ${extra}${extra2}`;
+}
+
+function buildConditionsSection(i) {
+  const st = S.chars[i];
+  const conds = ['Blinded','Charmed','Deafened','Frightened','Grappled','Incapacitated','Invisible','Paralyzed','Poisoned','Prone','Restrained','Stunned','Unconscious','Petrified','Concentrating'];
+  const icons = {'Blinded':'👁️','Charmed':'💕','Deafened':'🔇','Frightened':'😱','Grappled':'🤛','Incapacitated':'💫','Invisible':'👻','Paralyzed':'⚡','Poisoned':'🤢','Prone':'⬇️','Restrained':'⛓️','Stunned':'😵','Unconscious':'💤','Petrified':'🪨','Concentrating':'🔮'};
+  const btns = conds.map(c=>`<button class="cond-btn${c==='Concentrating'?' conc-btn':''}${st.conditions.includes(c)?' active':''}" data-cond="${c}" onclick="toggleCond('${c}')"><span class="ci">${icons[c]}</span>${c==='Incapacitated'?'Incapac.':c}</button>`).join('');
+  const hasConc = st.conditions.includes('Concentrating');
+  const concOptions = i===1?`<option value="">—</option><option value="Hex">Hex</option><option value="Hunger of Hadar">Hunger of Hadar</option><option value="Other">Other...</option>`
+    :i===3?`<option value="">—</option><option value="Suggestion">Suggestion</option><option value="Fear">Fear</option><option value="Hypnotic Pattern">Hypnotic Pattern</option><option value="Other">Other...</option>`
+    :null;
+  const concHtml = concOptions
+    ? `<select class="conc-select" id="conc-sel" onchange="saveConc(this.value)">${concOptions}</select><input class="conc-custom" id="conc-text" type="text" placeholder="Custom..." oninput="saveConc(this.value)" style="display:none">`
+    : `<input class="conc-custom" id="conc-text" type="text" placeholder="Spell name..." oninput="saveConc(this.value)" value="${st.concentration||''}">`;
+  const exhPips = [1,2,3,4,5,6].map(n=>`<div class="exh-pip${st.exhaustion>=n?' active':''}" onclick="setExh(${n})">${n}</div>`).join('');
+  return `
+<div class="section-card" id="cond-card"><div class="section-head collapsed" onclick="toggleSection(this)">🩹 &nbsp;Conditions &amp; Status <span class="chv">▾</span></div>
+<div class="section-body hidden">
+  <div class="cond-grid">${btns}</div>
+  <div class="conc-field-row${hasConc?' visible':''}" id="conc-row">
+    <div class="conc-field-label">🔮 Concentrating on:</div>
+    ${concHtml}
+  </div>
+  <div class="exh-row"><span class="exh-label">Exhaustion:</span><div class="exh-pips" id="exh-pips">${exhPips}</div></div>
+</div></div>`;
+}
+
+function buildAbilitiesSection(i) {
+  const ch = CHARS[i];
+  const boxes = ch.stats.map(s=>`<div class="ability-box"><div class="ab-label">${s.l}</div><div class="ab-score">${s.s}</div><div class="ab-mod">${s.m}</div></div>`).join('');
+  return `<div class="section-card"><div class="section-head" onclick="toggleSection(this)">💪 &nbsp;Ability Scores <span class="chv">▾</span></div><div class="section-body"><div class="ability-grid">${boxes}</div></div></div>`;
+}
+
+function buildSavesSection(i) {
+  const ch = CHARS[i];
+  const eff = getEffective(i);
+  const savesHtml = ch.saves.map(s=>`
+    <div class="save-row" onclick="rollDiceQuick('${s.n}','1d20${s.m}','save')">
+      <div class="save-pip${s.prof?' prof':''}"></div>
+      <span class="save-name">${s.n}</span>
+      <span class="save-val ${parseFloat(s.m)>0?'pos':parseFloat(s.m)<0?'neg':'zero'}">${s.m}</span>
+    </div>`).join('');
+  const skillsHtml = ch.skills.map(sk=>{
+    const advChk = eff.skillAdvantage&&eff.skillAdvantage.includes(sk.n.split(' ')[0].toLowerCase());
+    const disChk = eff.skillDisadvantage&&eff.skillDisadvantage.includes(sk.n.split(' ')[0].toLowerCase());
+    const advBadge = advChk?`<span class="adv-badge adv">ADV</span>`:disChk?`<span class="adv-badge dis">DIS</span>`:'';
+    return `<div class="skill-row" onclick="rollDiceQuick('${sk.n}','1d20${sk.m}','skill')">
+      <div class="skill-pip${sk.e?' exp':sk.prof?' prof':''}"></div>
+      <span class="skill-name">${sk.n}${advBadge} <span class="skill-attr">(${sk.a})</span></span>
+      <span class="skill-val ${parseFloat(sk.m)>0?'pos':parseFloat(sk.m)<0?'neg':'zero'}">${sk.m}</span>
+    </div>`;
+  }).join('');
+  const extras = i===1?`<div class="passive-row"><span class="passive-name">Devil's Sight</span><span class="passive-val">Darkness 120ft</span></div><div class="passive-row"><span class="passive-name">Fire Resistance</span><span class="passive-val">Hellish Resistance</span></div>`:
+    i===2?`<div class="passive-row"><span class="passive-name">Halfling Lucky</span><span class="passive-val">Reroll nat 1s</span></div><div class="passive-row"><span class="passive-name">Brave</span><span class="passive-val">Adv vs Frightened</span></div>`:
+    i===3?`<div class="passive-row"><span class="passive-name">Jack of All Trades</span><span class="passive-val">+1 unproficient</span></div>`:
+    i===4?`<div class="passive-row"><span class="passive-name">Dwarven Resilience</span><span class="passive-val">Adv/Resist Poison</span></div><div class="passive-row"><span class="passive-name">Darkvision</span><span class="passive-val">60ft</span></div>`:
+    i===5?`<div class="passive-row"><span class="passive-name">Divine Health</span><span class="passive-val">Immune to disease</span></div><div class="passive-row"><span class="passive-name">Divine Sense</span><span class="passive-val">4 uses/long rest</span></div>`:'';
+  return `<div class="section-card"><div class="section-head" onclick="toggleSection(this)">🎲 &nbsp;Saves &amp; Skills <span class="chv">▾</span></div>
+<div class="section-body">
+  <div style="font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.08em;color:var(--text-light);margin-bottom:.4rem;text-transform:uppercase">Saving Throws <span style="opacity:.5;font-weight:400;font-family:var(--font-b);text-transform:none;letter-spacing:0">— tap to roll</span></div>
+  <div class="saves-grid">${savesHtml}</div>
+  <div class="divider" style="margin:.55rem 0"></div>
+  <div style="font-family:var(--font-d);font-size:.58rem;font-weight:700;letter-spacing:.08em;color:var(--text-light);margin-bottom:.4rem;text-transform:uppercase">Skills <span style="opacity:.5;font-weight:400;font-family:var(--font-b);text-transform:none;letter-spacing:0">— tap to roll</span></div>
+  <div class="skills-list">${skillsHtml}</div>
+  <div class="divider" style="margin:.55rem 0"></div>
+  <div class="passive-row"><span class="passive-name">Passive Perception</span><span class="passive-val">${ch.passivePerc}</span></div>
+  ${extras}
+</div></div>`;
+}
+
+function buildResourcesSection(i) {
+  const ch = CHARS[i]; const st = S.chars[i];
+  const inspHtml = `<div class="inspiration-toggle${st.inspiration?' active':''}" id="insp-toggle" onclick="toggleInsp()"><span class="ii">✨</span><span class="it">INSPIRATION</span></div>`;
+  let resHtml = '';
+  if(i===0){
+    resHtml=buildPipGroup('sd','Superiority Dice (d8)','Short Rest',4,'',st)+
+      '<div class="divider" style="margin:.45rem 0"></div>'+
+      buildPipGroup('as','Action Surge','Short Rest',1,'',st)+
+      '<div class="divider" style="margin:.45rem 0"></div>'+
+      buildPipGroup('sw','Second Wind','Short Rest',1,'',st);
+  } else if(i===1){
+    resHtml=buildPipGroup('ws','Warlock Slots (Level 3 each)','Short Rest',2,'warlock',st)+
+      '<div style="font-size:.7rem;font-family:var(--font-b);font-style:italic;color:var(--text-light);margin-top:.25rem">Both slots are 3rd level. Recover on short rest.</div>';
+  } else if(i===3){
+    resHtml=buildPipGroup('bi','Bardic Inspiration (d8)','Short Rest',4,'insp',st)+
+      '<div class="divider" style="margin:.45rem 0"></div>'+
+      '<div style="font-family:var(--font-d);font-size:.6rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text-light);margin-bottom:.4rem">Spell Slots</div>'+
+      '<div class="spell-level-row"><div class="spell-level-label">Level 1</div>'+buildPipGroup('s1','','',4,'spell',st)+'</div>'+
+      '<div class="spell-level-row"><div class="spell-level-label">Level 2</div>'+buildPipGroup('s2','','',3,'spell',st)+'</div>'+
+      '<div class="spell-level-row"><div class="spell-level-label">Level 3</div>'+buildPipGroup('s3','','',2,'spell',st)+'</div>';
+  } else if(i===4){
+    resHtml=buildPipGroup('ki','Ki Points','Short Rest',5,'ki',st);
+  } else if(i===5){
+    resHtml=buildPipGroup('cd','Channel Divinity','Short Rest',1,'',st)+
+      '<div class="divider" style="margin:.45rem 0"></div>'+
+      '<div style="font-family:var(--font-d);font-size:.6rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text-light);margin-bottom:.4rem">Spell Slots</div>'+
+      '<div class="spell-level-row"><div class="spell-level-label">Level 1</div>'+buildPipGroup('s1','','',4,'spell',st)+'</div>'+
+      '<div class="spell-level-row"><div class="spell-level-label">Level 2</div>'+buildPipGroup('s2','','',2,'spell',st)+'</div>'+
+      '<div class="divider" style="margin:.45rem 0"></div>'+
+      '<div style="background:rgba(42,107,94,.1);border:1px solid rgba(61,154,137,.25);border-radius:7px;padding:.4rem .6rem;font-family:var(--font-d);font-size:.62rem;color:#7dd8cc"><strong>Lay on Hands:</strong> 25 HP pool · Action to heal any amount · 5 HP = cure disease/poison · Track in notes</div>';
+  } else {
+    resHtml='<div style="font-family:var(--font-b);font-style:italic;font-size:.78rem;color:var(--text-light)">No limited resources — Cunning Action, Uncanny Dodge &amp; Evasion always available.</div>';
+  }
+  return `<div class="section-card"><div class="section-head" onclick="toggleSection(this)">🔋 &nbsp;Resources <span class="chv">▾</span></div>
+<div class="section-body">${resHtml}<div class="divider" style="margin:.45rem 0"></div>${inspHtml}</div></div>`;
+}
+
+function buildPipGroup(res, label, restType, count, cls, st) {
+  const labelHtml = label ? `<div class="res-label">${label}${restType?` <span class="rest-badge">${restType}</span>`:''}</div>` : '';
+  const pips = Array.from({length:count},(_,j)=>`<div class="pip${cls?' '+cls:''}${st.pips[res]&&st.pips[res][j]?' used':''}" data-res="${res}" data-idx="${j}" onclick="togglePip('${res}',${j})"></div>`).join('');
+  return `${labelHtml}<div class="pip-row">${pips}</div>`;
+}
+
+function buildWeaponsSection(i) {
+  const eff = getEffective(i);
+  const rows = eff.weapons.map(w => {
+    const hitStr = w.hit === 0 ? 'Condition' : (w.hit > 0 ? '+'+w.hit : w.hit)+' hit';
+    const magic = w.isMagic ? ' magic-item' : '';
+    const atkCall = w.atkFm ? `quickRollWeapon('${w.n} Atk','${w.atkFm}','${w.n} Dmg','${w.dmgFm}')` : `quickRollWeapon('${w.n}','','${w.n} Dmg','${w.dmgFm}')`;
+    return `<div class="weapon-row${magic}" onclick="${atkCall}">
+      <div class="weapon-name">${w.n}${w.isMagic?'<span style="color:var(--gold-bright);margin-left:.25rem">✦</span>':''}</div>
+      <div class="weapon-hit">${hitStr}</div>
+      <div class="weapon-dmg">${w.dmg}</div>
+      <div class="weapon-note">${w.note}</div>
+      <div class="weapon-roll-hint">tap to roll</div>
+    </div>`;
+  }).join('');
+  return `<div class="section-card"><div class="section-head" onclick="toggleSection(this)">⚔️ &nbsp;Weapons <span class="chv">▾</span></div><div class="section-body"><div class="weapon-list" id="weapon-list">${rows}</div></div></div>`;
+}
+
+function buildFeaturesSection(i) {
+  const content = [FEATURES_0, FEATURES_1, FEATURES_2, FEATURES_3, FEATURES_4, FEATURES_5][i];
+  return `<div class="section-card"><div class="section-head collapsed" onclick="toggleSection(this)">📜 &nbsp;Features <span class="chv">▾</span></div><div class="section-body hidden">${content}</div></div>`;
+}
+
+function buildSpellsSection(i) {
+  const content = [null, SPELLS_1, null, SPELLS_3, null, SPELLS_5][i];
+  if (!content) return '';
+  return `<div class="section-card"><div class="section-head collapsed" onclick="toggleSection(this)">✨ &nbsp;Spells <span class="chv">▾</span></div><div class="section-body hidden">${content}</div></div>`;
+}
+
+function buildDutchCourageSection() {
+  const st = S.chars[4];
+  const d = st.drinks ?? 1;
+  const fl = st.flasks ?? 3;
+  return `<div class="section-card"><div class="section-head" onclick="toggleSection(this)">🍺 &nbsp;Dutch Courage <span class="chv">▾</span></div>
+<div class="section-body">
+<div class="dc-tracker" id="dc-tracker">
+  <div class="dc-title">⚓ Sobriety Tracker ⚓</div>
+  <div class="dc-flask-row">
+    <button class="dc-flask-btn" onclick="adjustFlasks(-1)">−</button>
+    <span class="dc-flask-label">🍺 Flasks:</span>
+    <span class="dc-flask-count" id="dc-flasks">${fl}</span>
+    <button class="dc-flask-btn" onclick="adjustFlasks(1)">+</button>
+  </div>
+  <div class="dc-counter-row">
+    <button class="dc-minus" onclick="adjustDrinks(-1)">−</button>
+    <div><div class="dc-count" id="dc-count">${d}</div><div class="dc-count-label">drinks</div></div>
+    <button class="dc-plus" onclick="adjustDrinks(1)">+</button>
+  </div>
+  <div class="dc-states">
+    <div class="dc-state-btn s-sober${d===0?' active':''}" id="dc-s0" onclick="setDrinks(0)"><span class="ds-emoji">😰</span>SOBER</div>
+    <div class="dc-state-btn s-tipsy${d===1?' active':''}" id="dc-s1" onclick="setDrinks(1)"><span class="ds-emoji">😌</span>TIPSY★</div>
+    <div class="dc-state-btn s-drunk${d===2?' active':''}" id="dc-s2" onclick="setDrinks(2)"><span class="ds-emoji">😄</span>DRUNK</div>
+    <div class="dc-state-btn s-wasted${d===3?' active':''}" id="dc-s3" onclick="setDrinks(3)"><span class="ds-emoji">😵</span>WASTED</div>
+    <div class="dc-state-btn s-blotto${d===4?' active':''}" id="dc-s4" onclick="setDrinks(4)"><span class="ds-emoji">☠️</span>BLOTTO</div>
+  </div>
+  <div class="dc-effect" id="dc-effect">${DC_EFFECTS[d]||DC_EFFECTS[0]}</div>
+  <button class="dc-drop-btn" onclick="dropDrinkLevel()">⬇ Drop Level (sobering up)</button>
+  <div class="dc-rules">
+    <div class="dc-rules-head" onclick="toggleDcRules(this)">📜 How Dutch Courage works <span>▾</span></div>
+    <div class="dc-rules-body">
+      <p><strong>Drinking:</strong> Bonus action on Bogdan's turn. Costs 1 flask. Raises level by 1.</p>
+      <p><strong>Sobering up:</strong> GM taps "Drop Level" after each major encounter, or roughly every hour out of combat. In a long boss fight the GM may drop it mid-combat around round 4–5.</p>
+      <p><strong>Flasks:</strong> Starts with 3. Can find more as loot. When at 0, can only sober up — can't drink.</p>
+      <p><strong>BLOTTO (4 drinks):</strong> Start of each turn, DC 12 CON save. Fail → fall Prone + lose action. Three failed saves in a row → Unconscious 1d4 rounds, wake up at Sober.</p>
+      <p><strong>Optimal play:</strong> Stay at Tipsy (1 drink). Drink before combat, let it drop naturally.</p>
+    </div>
+  </div>
+</div>
+</div></div>`;
+}
+
+function buildLootSection(i) {
+  const st = S.chars[i];
+  const itemsHtml = st.loot.length === 0
+    ? '<div class="no-loot-hint">No loot yet. Enter a code from your GM.</div>'
+    : st.loot.map((item, idx) => buildItemCard(item, idx)).join('');
+  return `<div class="section-card"><div class="section-head" onclick="toggleSection(this)">🎒 &nbsp;Loot &amp; Inventory <span class="chv">▾</span></div>
+<div class="section-body">
+  <div class="loot-code-row">
+    <input class="loot-code-input" id="loot-code-input" type="text" placeholder="Enter code from GM (e.g. RUM1)…" autocapitalize="characters" autocomplete="off" spellcheck="false">
+    <button class="loot-decode-btn" onclick="decodeItem()">Reveal →</button>
+  </div>
+  <div class="loot-items-list" id="loot-items-list">${itemsHtml}</div>
+</div></div>`;
+}
+
+function buildItemCard(item, idx) {
+  const eq = item.equipped;
+  const rarityClass = (item.rarity||'common').toLowerCase().replace(' ','-');
+  return `<div class="loot-item-card${eq?' equipped-card':''}">
+    ${eq?'<div class="equipped-banner">EQUIPPED ✦</div>':''}
+    <div class="loot-item-header">
+      <div class="loot-item-name">${item.name}</div>
+      <span class="rarity-badge ${rarityClass}">${item.rarity||'Common'}</span>
+    </div>
+    <div class="loot-item-desc">${item.desc||''}</div>
+    ${item.fxText?`<div class="loot-item-fx${eq?' active-fx':''}">${item.fxText}</div>`:''}
+    <div class="loot-item-actions">
+      <button class="equip-btn ${eq?'do-unequip':'do-equip'}" onclick="toggleEquip(${idx})">${eq?'🔓 Unequip':'⚔️ Equip'}</button>
+      <button class="discard-btn" onclick="discardItem(${idx})">🗑</button>
+    </div>
+  </div>`;
+}
+
+function buildEquipmentSection(i) {
+  const equipment = [EQ_0,EQ_1,EQ_2,EQ_3,EQ_4,EQ_5][i];
+  const st = S.chars[i];
+  return `<div class="section-card"><div class="section-head collapsed" onclick="toggleSection(this)">🧳 &nbsp;Equipment &amp; Notes <span class="chv">▾</span></div>
+<div class="section-body hidden">
+  ${equipment}
+  <div class="divider" style="margin:.55rem 0"></div>
+  <textarea class="notes-area" id="notes-area" placeholder="Session notes, plans, shanty titles…" oninput="saveNotes(this.value)">${st.notes||''}</textarea>
+</div></div>`;
+}
+
+function buildRestSection(i) {
+  const ch = CHARS[i];
+  return `<div class="rest-card">
+  <div class="rest-label">⚓ Rest &amp; Recovery</div>
+  <div class="rest-buttons">
+    <button class="rest-btn short" onclick="shortRest()"><span class="rb-icon">⏳</span><span class="rb-label">SHORT REST</span><span class="rb-desc">${ch.shortRestRes.length?'Resets: '+ch.shortRestRes.map(r=>({sd:'Sup Dice',as:'Action Surge',sw:'Second Wind',ws:'Warlock Slots',bi:'Bardic Insp',ki:'Ki Points',cd:'Channel Divinity'}[r]||r)).join(', '):'Roll Hit Die only'}</span></button>
+    <button class="rest-btn long" onclick="longRest()"><span class="rb-icon">🌙</span><span class="rb-label">LONG REST</span><span class="rb-desc">Full HP · All resources · Clear conditions</span></button>
+  </div>
+  <div class="hd-row">
+    <button class="hd-btn" onclick="rollHitDie('${ch.hitDie}',${ch.hdMod})">🎲 Roll Hit Die (${ch.hitDie}+${ch.hdMod})</button>
+    <span class="hd-label">adds to current HP</span>
+  </div>
+</div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// EFFECTIVE STATS (stat overwrite)
+// ═══════════════════════════════════════════════════
+function getEffective(i) {
+  const ch = CHARS[i]; const st = S.chars[i];
+  const equipped = (st.loot||[]).filter(it=>it.equipped);
+  let acBonus=0, spellSave=null, maxHp=ch.maxHp;
+  let skillAdvantage=[], skillDisadvantage=[];
+  let weaponPatches={};
+  equipped.forEach(item=>{
+    const fx = item.statEffects||{};
+    if(fx.ac) acBonus+=fx.ac;
+    if(fx.spellSave) spellSave=(parseInt(ch.spellSave)||0)+fx.spellSave;
+    if(fx.maxHp) maxHp+=fx.maxHp;
+    if(fx.advantage) skillAdvantage=[...skillAdvantage,...fx.advantage];
+    if(fx.disadvantage) skillDisadvantage=[...skillDisadvantage,...fx.disadvantage];
+    if(fx.weaponPatch) {
+      const p = fx.weaponPatch;
+      weaponPatches[p.targetId] = p;
+    }
+  });
+  const weapons = ch.baseWeapons.map(w=>{
+    const patch = weaponPatches[w.id];
+    if(!patch) return {...w};
+    const newHit = patch.hitBonus!==undefined ? w.hit+patch.hitBonus : (patch.hitOverride!==undefined?patch.hitOverride:w.hit);
+    const newDmg = patch.dmg || w.dmg;
+    const newName = patch.name || w.n;
+    const newAtkFm = patch.hitBonus!==undefined && w.atkFm ? w.atkFm.replace(/\+(\d+)$/,(m,n)=>'+'+(parseInt(n)+patch.hitBonus)) : (patch.atkFm||w.atkFm);
+    const newDmgFm = patch.dmgFm || w.dmgFm;
+    return {...w, n:newName, hit:newHit, dmg:newDmg, atkFm:newAtkFm, dmgFm:newDmgFm, isMagic:true};
+  });
+  return {ac:ch.baseAc+acBonus, acBonus, spellSave, maxHp, skillAdvantage, skillDisadvantage, weapons};
+}
+
+function refreshDynamicStats() {
+  const i = S.selectedChar; if(i===null) return;
+  const eff = getEffective(i);
+  const acEl = document.getElementById('stat-ac');
+  if(acEl) acEl.textContent = eff.ac;
+  const hmEl = document.getElementById('hp-max');
+  if(hmEl) hmEl.textContent = eff.maxHp !== CHARS[i].maxHp ? eff.maxHp : CHARS[i].maxHp;
+  const wl = document.getElementById('weapon-list');
+  if(wl) wl.innerHTML = buildWeaponsSection(i).match(/id="weapon-list">([\s\S]*?)<\/div><\/div><\/div>/)?.[1] || '';
+  // Re-build weapons from effective
+  if(wl) {
+    const rows = eff.weapons.map(w => {
+      const hitStr = w.hit === 0 ? 'Condition' : (w.hit > 0 ? '+'+w.hit : w.hit)+' hit';
+      const magic = w.isMagic ? ' magic-item' : '';
+      const atkCall = w.atkFm ? `quickRollWeapon('${w.n} Atk','${w.atkFm}','${w.n} Dmg','${w.dmgFm}')` : `quickRollWeapon('${w.n}','','${w.n} Dmg','${w.dmgFm}')`;
+      return `<div class="weapon-row${magic}" onclick="${atkCall}">
+        <div class="weapon-name">${w.n}${w.isMagic?'<span style="color:var(--gold-bright);margin-left:.25rem">✦</span>':''}</div>
+        <div class="weapon-hit">${hitStr}</div><div class="weapon-dmg">${w.dmg}</div>
+        <div class="weapon-note">${w.note}</div><div class="weapon-roll-hint">tap to roll</div>
+      </div>`;
+    }).join('');
+    wl.innerHTML = rows;
+  }
+  updateSavesSkillsAdvantage(i, eff);
+  updateCombatGrid(i, eff);
+}
+
+function updateCombatGrid(i, eff) {
+  const cg = document.getElementById('combat-grid');
+  if(cg) cg.innerHTML = buildCombatGrid(i, eff);
+}
+function updateSavesSkillsAdvantage(i, eff) {/* badges refreshed on full render if needed */}
+
+// ═══════════════════════════════════════════════════
+// RESTORE
+// ═══════════════════════════════════════════════════
+function restoreChar(i) {
+  const st = S.chars[i];
+  setHPDisplay(st.hp);
+  const thpEl = document.getElementById('thp'); if(thpEl) thpEl.value = st.tempHp||0;
+  const insp = document.getElementById('insp-toggle'); if(insp) insp.classList.toggle('active', st.inspiration);
+  restorePips(i);
+  restoreConcentration(i);
+  updateTopbar(i);
+  if(i===4) renderDutchCourage(i);
+  refreshDynamicStats();
+}
+
+function restorePips(i) {
+  const st = S.chars[i];
+  document.querySelectorAll('[data-res][data-idx]').forEach(el=>{
+    const res=el.getAttribute('data-res'), idx=parseInt(el.getAttribute('data-idx'));
+    if(st.pips[res]) el.classList.toggle('used', !!st.pips[res][idx]);
+  });
+}
+
+function restoreConcentration(i) {
+  const st = S.chars[i];
+  if(st.conditions.includes('Concentrating')) {
+    const row = document.getElementById('conc-row');
+    if(row) row.classList.add('visible');
+    const sel = document.getElementById('conc-sel');
+    const txt = document.getElementById('conc-text');
+    if(sel) sel.value = st.concentration||'';
+    if(txt) txt.value = st.concentration||'';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// TOPBAR
+// ═══════════════════════════════════════════════════
+function updateTopbar(i) {
+  const ch = CHARS[i]; const st = S.chars[i];
+  document.getElementById('topbar-name').textContent = ch.emoji + ' ' + ch.name;
+  const cEl = document.getElementById('topbar-conds');
+  cEl.innerHTML = '';
+  st.conditions.forEach(c=>{
+    const b=document.createElement('span');
+    b.className='topbar-cond-badge'+(c==='Concentrating'?' conc':'');
+    b.textContent=c==='Concentrating'&&st.concentration?'🔮 '+st.concentration:c;
+    cEl.appendChild(b);
+  });
+  if(st.exhaustion>0){const b=document.createElement('span');b.className='topbar-cond-badge';b.textContent='Exh '+st.exhaustion;cEl.appendChild(b);}
+}
+
+// ═══════════════════════════════════════════════════
+// HP
+// ═══════════════════════════════════════════════════
+function ci(){return S.selectedChar;}
+function curSt(){return S.chars[ci()];}
+function setHPDisplay(val, animType) {
+  const el=document.getElementById('hp-cur'); if(!el) return;
+  el.textContent=val;
+  const pct=val/CHARS[ci()].maxHp;
+  el.className='hp-cur'+(pct<=.25?' danger':pct<=.5?' warning':'');
+  if(animType){
+    el.classList.add(animType==='heal'?'anim-heal':'anim-dmg');
+    el.addEventListener('animationend',()=>{el.classList.remove('anim-heal','anim-dmg');},{once:true});
+  }
+  if(val===0){const cc=document.getElementById('cond-card');if(cc){const h=cc.querySelector('.section-head');const b=cc.querySelector('.section-body');if(h&&h.classList.contains('collapsed')){h.classList.remove('collapsed');b.classList.remove('hidden');}}}
+}
+function changeHP(type) {
+  const amt=parseInt(document.getElementById('hp-in').value)||0;
+  if(!amt){showToast('Enter an amount first!');return;}
+  const st=curSt(); const maxHp=getEffective(ci()).maxHp;
+  if(type==='heal'){st.hp=Math.min(maxHp,st.hp+amt);showToast('💚 +'+amt+' HP → '+st.hp);}
+  else {
+    const temp=parseInt(document.getElementById('thp').value)||0;
+    if(temp>0){const abs=Math.min(temp,amt);const rem=amt-abs;document.getElementById('thp').value=Math.max(0,temp-abs);saveTHP(Math.max(0,temp-abs));st.hp=Math.max(0,st.hp-rem);showToast('🛡️ Temp absorbed '+abs+(rem>0?', −'+rem+' HP → '+st.hp:''));}
+    else{st.hp=Math.max(0,st.hp-amt);showToast('💔 −'+amt+' HP → '+st.hp);}
+  }
+  setHPDisplay(st.hp, type); document.getElementById('hp-in').value=''; save();
+}
+function resetHP(){curSt().hp=CHARS[ci()].maxHp;setHPDisplay(curSt().hp);showToast('↺ HP reset');save();}
+function saveTHP(v){curSt().tempHp=parseInt(v)||0;save();}
+
+// ═══════════════════════════════════════════════════
+// SECTIONS, PIPS, SAVES, INSPIRATION, CONDITIONS, EXH
+// ═══════════════════════════════════════════════════
+function toggleSection(head){const body=head.nextElementSibling;const c=head.classList.contains('collapsed');head.classList.toggle('collapsed',!c);body.classList.toggle('hidden',!c);}
+function togglePip(res,idx){const st=curSt();if(!st.pips[res])st.pips[res]=[];st.pips[res][idx]=!st.pips[res][idx];const el=document.querySelector(`[data-res="${res}"][data-idx="${idx}"]`);if(el)el.classList.toggle('used',st.pips[res][idx]);save();}
+function toggleDS(type,idx){const st=curSt();st.ds[type][idx]=!st.ds[type][idx];const cls=type==='s'?'success':'failure';document.querySelectorAll('.ds-pip.'+cls).forEach((p,j)=>p.classList.toggle('filled',st.ds[type][j]));const s=st.ds.s.filter(Boolean).length,f=st.ds.f.filter(Boolean).length;if(s>=3)showToast('🙏 '+CHARS[ci()].name.split(' ')[0]+' stabilizes!');if(f>=3)showToast('💀 Death!');save();}
+function toggleInsp(){const st=curSt();st.inspiration=!st.inspiration;document.getElementById('insp-toggle').classList.toggle('active',st.inspiration);showToast(st.inspiration?'✨ Inspired!':'✨ Inspiration used');save();}
+function toggleCond(cond){const st=curSt();const idx=st.conditions.indexOf(cond);if(idx===-1)st.conditions.push(cond);else{st.conditions.splice(idx,1);if(cond==='Concentrating'){st.concentration='';const row=document.getElementById('conc-row');if(row)row.classList.remove('visible');}}const btn=document.querySelector(`[data-cond="${cond}"]`);if(btn)btn.classList.toggle('active',st.conditions.includes(cond));if(cond==='Concentrating'){const row=document.getElementById('conc-row');if(row)row.classList.toggle('visible',st.conditions.includes('Concentrating'));}updateTopbar(ci());save();}
+function saveConc(v){const st=curSt();st.concentration=v;const txt=document.getElementById('conc-text');const sel=document.getElementById('conc-sel');if(sel&&v==='Other'&&txt)txt.style.display='block';else if(sel&&txt)txt.style.display='none';updateTopbar(ci());save();}
+function setExh(n){const st=curSt();st.exhaustion=st.exhaustion===n?n-1:n;document.querySelectorAll('.exh-pip').forEach((p,j)=>p.classList.toggle('active',j<st.exhaustion));if(st.exhaustion>0)showToast('😰 Exhaustion '+st.exhaustion);updateTopbar(ci());save();}
+let notesTimer;
+function saveNotes(v){clearTimeout(notesTimer);notesTimer=setTimeout(()=>{curSt().notes=v;save();},400);}
+
+// ═══════════════════════════════════════════════════
+// DUTCH COURAGE (char 4)
+// ═══════════════════════════════════════════════════
+const DC_EFFECTS=[
+  '<strong style="color:#9ca3af">SOBER (0 drinks):</strong> DisAdv on all attack rolls and all DEX checks. Sobriety is suffering.',
+  '<strong style="color:#4ade80">TIPSY ★ (1 drink — optimal):</strong> Normal function. Sharp enough to fight, loose enough not to care.',
+  '<strong style="color:#fbbf24">DRUNK (2 drinks):</strong> +1d4 bonus damage on all melee attacks. DisAdv on DEX saving throws.',
+  '<strong style="color:#f87171">WASTED (3 drinks):</strong> Reckless Attack on all hits (adv to attack, enemies adv vs you). DisAdv on INT &amp; WIS checks.',
+  '<strong style="color:#d8b4fe">BLOTTO ☠ (4 drinks):</strong> Reckless Attack. DisAdv on <em>all</em> checks &amp; saves. Each turn: DC 12 CON save or Prone + lose action. Three failed saves → Unconscious 1d4 rounds, wake at Sober.'
+];
+function renderDutchCourage(i){
+  const st=S.chars[i];
+  const d=st.drinks??1;
+  const fl=st.flasks??3;
+  const cnt=document.getElementById('dc-count');if(cnt)cnt.textContent=d;
+  const flEl=document.getElementById('dc-flasks');if(flEl)flEl.textContent=fl;
+  [0,1,2,3,4].forEach(n=>{const el=document.getElementById('dc-s'+n);if(el)el.classList.toggle('active',n===d);});
+  const eff=document.getElementById('dc-effect');if(eff)eff.innerHTML=DC_EFFECTS[d]||DC_EFFECTS[0];
+}
+function adjustDrinks(delta){
+  const st=curSt();
+  if(delta>0){
+    const fl=st.flasks??3;
+    if(fl<=0){showToast('🍺 No flasks left!');return;}
+    st.flasks=fl-1;
+  }
+  st.drinks=Math.max(0,Math.min(4,(st.drinks??1)+delta));
+  renderDutchCourage(ci());
+  const labels=['😰 Sober — the shakes are back','😌 Tipsy — peak performance','😄 Drunk — +1d4 melee!','😵 Wasted — Reckless Attack','☠️ BLOTTO — CON save each turn!'];
+  showToast(labels[st.drinks]);
+  save();
+}
+function adjustFlasks(delta){
+  const st=curSt();
+  st.flasks=Math.max(0,Math.min(9,(st.flasks??3)+delta));
+  renderDutchCourage(ci());
+  showToast('🍺 Flasks: '+st.flasks);
+  save();
+}
+function setDrinks(n){
+  const st=curSt();
+  if(n>( st.drinks??1)){
+    const fl=st.flasks??3;
+    if(fl<=0){showToast('🍺 No flasks left!');return;}
+    st.flasks=fl-1;
+  }
+  st.drinks=n;
+  renderDutchCourage(ci());
+  save();
+}
+function dropDrinkLevel(){
+  const st=curSt();
+  if((st.drinks??1)===0){showToast('Already fully sober.');return;}
+  st.drinks=Math.max(0,(st.drinks??1)-1);
+  renderDutchCourage(ci());
+  const labels=['😰 Fully sober now. Suffering.','😌 Back to Tipsy','😄 Back to Drunk','😵 Back to Wasted'];
+  showToast(labels[st.drinks]);
+  save();
+}
+function toggleDcRules(head){
+  const body=head.nextElementSibling;
+  body.classList.toggle('open');
+  head.querySelector('span').textContent=body.classList.contains('open')?'▴':'▾';
+}
+
+// ═══════════════════════════════════════════════════
+// RESTS
+// ═══════════════════════════════════════════════════
+function shortRest(){const i=ci();const ch=CHARS[i];const st=curSt();ch.shortRestRes.forEach(res=>{if(!st.pips[res])return;st.pips[res]=st.pips[res].map(()=>false);});restorePips(i);showToast('⏳ Short Rest — resources reset');save();}
+function longRest(){if(!confirm('Long rest? Resets HP, all resources, and clears conditions.'))return;const i=ci();const ch=CHARS[i];const st=curSt();st.hp=getEffective(i).maxHp;setHPDisplay(st.hp);Object.keys(st.pips).forEach(r=>{st.pips[r]=st.pips[r].map(()=>false);});restorePips(i);st.conditions=[];st.concentration='';st.exhaustion=0;st.ds={s:[false,false,false],f:[false,false,false]};document.querySelectorAll('.cond-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.ds-pip').forEach(p=>p.classList.remove('filled'));document.querySelectorAll('.exh-pip').forEach(p=>p.classList.remove('active'));const cr=document.getElementById('conc-row');if(cr)cr.classList.remove('visible');updateTopbar(i);showToast('🌙 Long Rest — fully restored!');save();}
+function rollHitDie(die,mod){const i=ci();const ch=CHARS[i];const st=curSt();const maxHp=getEffective(i).maxHp;const result=rollExpr(die);const gain=result.total+mod;const newHp=Math.min(maxHp,st.hp+gain);const healed=newHp-st.hp;st.hp=newHp;setHPDisplay(newHp);if(healed>0)showToast('🎲 Hit Die ['+result.rolls.join('+')+']+'+(mod)+' = +'+gain+' HP');else showToast('🎲 Already at full HP');addHistory(die+'+'+(mod>=0?'+':'')+mod,gain);save();}
+
+// ═══════════════════════════════════════════════════
+// LOOT SYSTEM
+// ═══════════════════════════════════════════════════
+const LOOT_CATALOG={
+ BOOTS:{id:'boots',name:'Boots of Confident Incompetence',type:'Wondrous',rarity:'Rare',desc:'Advantage on Persuasion when attempting something obviously terrible. Disadvantage on Insight — you genuinely cannot tell when a plan is bad.',fxText:'ADV Persuasion (bad plans) · DisAdv Insight · Cannot remove without Remove Curse',statEffects:{advantage:['persuasion'],disadvantage:['insight']}},
+ COMPASS:{id:'compass',name:'Compass of Questionable Directions',type:'Wondrous',rarity:'Uncommon',desc:'Points toward "the most interesting thing within 1 mile." The compass decides what is interesting. Yes/no oracle (75% accurate, extremely smug about the other 25%).',fxText:'Points to most interesting thing 1mi · Yes/No oracle 75% accurate',statEffects:{}},
+ RUM1:{id:'rum1',name:'Rum of the Depths',type:'Potion (Flask)',rarity:'Uncommon',desc:'d6: 1–2: 2d4+2 temp HP (feel invincible, not). 3–4: Misty Step, 10ft random direction. 5: Enlarge 1min. 6: Possessed by dead pirate (advice + pass out 1 round).',fxText:'d6 random effect',statEffects:{}},
+ RUM2:{id:'rum2',name:'Rum of the Depths',type:'Potion (Flask)',rarity:'Uncommon',desc:'d6: 1–2: 2d4+2 temp HP. 3–4: Misty Step random direction. 5: Enlarge 1min. 6: Possessed by dead pirate (advice + pass out).',fxText:'d6 random effect',statEffects:{}},
+ RUM3:{id:'rum3',name:'Rum of the Depths',type:'Potion (Flask)',rarity:'Uncommon',desc:'d6: 1–2: 2d4+2 temp HP. 3–4: Misty Step random direction. 5: Enlarge 1min. 6: Possessed by dead pirate (advice + pass out).',fxText:'d6 random effect',statEffects:{}},
+ HOOK:{id:'hook',name:'The Golden Hook',type:'Weapon (Flintlock)',rarity:'Rare',desc:'+1 magical flintlock. Grappling bolt 1/day: target Restrained DC 14 STR. Functions as grappling hook for climbing.',fxText:'+1 attack and damage · Grappling bolt 1/day (Restrained DC 14 STR)',statEffects:{weaponPatch:{targetId:'pistol',hitBonus:1,dmg:'1d6+3',name:'The Golden Hook ✦'}}},
+ GROG:{id:'grog',name:'Flask of Good Grog',type:'Consumable',rarity:'Common',desc:"Bogdan: +1 drink level. Others: 1d4 temp HP.",fxText:'Bogdan: +1 drink level · Others: 1d4 temp HP',statEffects:{}},
+ ADMIRAL:{id:'admiral',name:"Admiral's Reserve",type:'Consumable',rarity:'Uncommon',desc:"Bogdan: +2 drink levels in one sip (risky). Others: 2d4 temp HP + DisAdv WIS saves 1hr.",fxText:'Bogdan: +2 drink levels · Others: 2d4 temp HP + DisAdv WIS 1hr',statEffects:{}},
+ MYSTERY:{id:'mystery',name:'Mystery Bottle',type:'Consumable',rarity:'Common',desc:"Unlabelled. Roll on Rum of the Depths table. Or don't. Maybe it's vinegar.",fxText:'Roll Rum of the Depths table (or GM decides)',statEffects:{}},
+ SCALE:{id:'scale',name:"Mermaid's Scale",type:'Wondrous',rarity:'Uncommon',desc:'Advantage on Athletics (swim). While fully submerged: resistance to cold damage.',fxText:'ADV Athletics (swim) · Resistance cold while submerged',statEffects:{advantage:['athletics']}},
+ DOUBLOON:{id:'doubloon',name:'Lucky Doubloon',type:'Wondrous',rarity:'Common',desc:'Once per day: reroll any die after rolling, use either result. Always warm.',fxText:'1/day: reroll any die, keep either result',statEffects:{}},
+ COIN:{id:'coin',name:'Cursed Vault Coin',type:'Wondrous',rarity:'Common',desc:"Start of each combat: DC 13 WIS save or spend first action admiring the coin. Curse lifted when Kraken's curse is broken.",fxText:'CURSED: combat start DC 13 WIS or lose first action',statEffects:{}},
+ STORM:{id:'storm',name:'Bottle of Captured Storm',type:'Consumable',rarity:'Uncommon',desc:'Throw 30ft: 10ft radius 1min. Creatures inside: DC 13 DEX or 2d6 lightning per round. One use.',fxText:'10ft lightning zone · 2d6 lightning DC 13 DEX · 1 minute',statEffects:{}},
+ EYEPATCH:{id:'eyepatch',name:"Pirate's Eye Patch",type:'Wondrous',rarity:'Common',desc:'DisAdv Perception, Adv Stealth. Creatures cannot gain flanking-based advantage against you.',fxText:'DisAdv Perception · ADV Stealth · No flanking advantage',statEffects:{advantage:['stealth'],disadvantage:['perception']}}
+};
+let pendingLootItem = null;
+function decodeItem(){
+  const raw=(document.getElementById('loot-code-input').value||'').trim();
+  if(!raw){showToast('Enter a code first!');return;}
+  const key=raw.toUpperCase().replace(/[\s._-]/g,'');
+  if(LOOT_CATALOG[key]){
+    const c=LOOT_CATALOG[key];
+    pendingLootItem={id:c.id,name:c.name,type:c.type,rarity:c.rarity,desc:c.desc,fxText:c.fxText,statEffects:c.statEffects||{},equipped:false};
+    showLootModal(pendingLootItem);return;
+  }
+  if(raw.startsWith('GK:')){
+    try{
+      const json=decodeURIComponent(escape(atob(raw.slice(3))));
+      const d=JSON.parse(json);
+      pendingLootItem={id:d.id||Date.now().toString(),name:d.n||'Unknown Item',type:d.t||'other',rarity:d.r||'Common',desc:d.d||'',fxText:d.fx||'',statEffects:d.se||{},equipped:false};
+      showLootModal(pendingLootItem);return;
+    }catch(e){}
+  }
+  showToast('❌ Unknown code — check with your GM');
+}
+function showLootModal(item){
+  const body=document.getElementById('loot-modal-body');
+  const rarityClass=(item.rarity||'common').toLowerCase().replace(' ','-');
+  body.innerHTML=`
+    <div class="modal-item-rarity"><span class="rarity-badge ${rarityClass}">${item.rarity}</span> <span style="font-size:.7rem;font-family:var(--font-d);color:var(--parchment-dark);opacity:.6">${item.type}</span></div>
+    <div class="modal-item-name">${item.name}</div>
+    <div class="modal-item-desc">${item.desc}</div>
+    ${item.fxText?`<div class="modal-item-fx-box"><div class="modal-item-fx-label">Effect</div><div class="modal-item-fx-text">${item.fxText}</div></div>`:''}`;
+  document.getElementById('loot-modal').classList.add('open');
+}
+function closeLootModal(){document.getElementById('loot-modal').classList.remove('open');pendingLootItem=null;}
+function lootModalBg(e){if(e.target===document.getElementById('loot-modal'))closeLootModal();}
+function confirmLoot(action){
+  if(!pendingLootItem)return;
+  const st=curSt();
+  const item={...pendingLootItem, equipped: action==='equip'};
+  st.loot.push(item);
+  if(action==='equip'){applyItemEffects();showToast('⚔️ '+item.name+' equipped!');}
+  else showToast('📦 '+item.name+' stored in inventory');
+  closeLootModal();
+  document.getElementById('loot-code-input').value='';
+  refreshLootList();
+  refreshDynamicStats();
+  save();
+}
+function toggleEquip(idx){
+  const st=curSt();const item=st.loot[idx];
+  item.equipped=!item.equipped;
+  if(item.equipped)showToast('⚔️ '+item.name+' equipped!');
+  else showToast('🔓 '+item.name+' unequipped');
+  refreshLootList();
+  refreshDynamicStats();
+  save();
+}
+function discardItem(idx){
+  const st=curSt();
+  if(!confirm('Discard '+st.loot[idx].name+'?'))return;
+  const was=st.loot[idx].equipped;
+  st.loot.splice(idx,1);
+  if(was)refreshDynamicStats();
+  refreshLootList();
+  save();
+}
+function refreshLootList(){
+  const el=document.getElementById('loot-items-list');if(!el)return;
+  const st=curSt();
+  el.innerHTML=st.loot.length===0
+    ?'<div class="no-loot-hint">No loot yet. Enter a code from your GM.</div>'
+    :st.loot.map((it,idx)=>buildItemCard(it,idx)).join('');
+}
+function applyItemEffects(){}// stats applied via getEffective on render
+
+// ═══════════════════════════════════════════════════
+// DICE ENGINE
+// ═══════════════════════════════════════════════════
+let diceState={qty:1,sides:null,mod:0,advantage:null,rolling:false};
+function rollExpr(expr){
+  const rolls=[];let total=0;
+  let e=expr;
+  [...e.matchAll(/(\d+)d(\d+)/g)].forEach(m=>{
+    const cnt=parseInt(m[1]),sides=parseInt(m[2]);
+    for(let j=0;j<cnt;j++){const r=Math.floor(Math.random()*sides)+1;rolls.push(r);total+=r;}
+    e=e.replace(m[0],'');
+  });
+  [...e.matchAll(/[+-]\d+/g)].forEach(m=>total+=parseInt(m[0]));
+  return{total,rolls};
+}
+function rollDice(qty,sides,mod,adv){
+  if(sides===20&&adv){const r1=Math.floor(Math.random()*20)+1,r2=Math.floor(Math.random()*20)+1;
+    const kept=adv==='adv'?Math.max(r1,r2):Math.min(r1,r2);
+    return{final:kept+mod,results:[{v:r1,kept:r1===kept},{v:r2,kept:r2===kept}],mod,adv,natural:kept};}
+  let sum=0,results=[];
+  for(let j=0;j<qty;j++){const r=Math.floor(Math.random()*sides)+1;results.push({v:r,kept:true});sum+=r;}
+  return{final:sum+mod,results,mod,natural:qty===1?results[0].v:null};
+}
+function animateResult(result,formula){
+  diceState.rolling=true;
+  const el=document.getElementById('dice-result'),fEl=document.getElementById('dice-formula'),bEl=document.getElementById('dice-breakdown');
+  el.className='dice-result rolling';fEl.textContent=formula;bEl.textContent='';
+  let f=10;const sides=diceState.sides||20;
+  const t=setInterval(()=>{
+    el.textContent=Math.floor(Math.random()*sides)+1;
+    if(--f<=0){
+      clearInterval(t);diceState.rolling=false;el.className='dice-result settled';
+      el.textContent=result.final;
+      if(result.natural===20&&sides===20)el.classList.add('nat20');
+      else if(result.natural===1&&sides===20)el.classList.add('nat1');
+      if(result.adv){bEl.textContent=result.results.map(r=>r.kept?'['+r.v+'✓]':'('+r.v+')').join(' ')+(result.mod?( result.mod>0?'+'+result.mod:result.mod):'');}
+      else{bEl.textContent='['+result.results.map(r=>r.v).join('+')+']'+(result.mod?(result.mod>0?'+'+result.mod:result.mod):'')+' = '+result.final;}
+      if(result.natural===20&&sides===20)showToast('🌟 NATURAL 20!!! 🌟');
+      else if(result.natural===1&&sides===20)showToast('💀 Nat 1...');
+      addHistory(formula,result.final,null);
+    }
+  },55);
+}
+function doRoll(){const{qty,sides,mod,advantage}=diceState;if(!sides||diceState.rolling)return;animateResult(rollDice(qty,sides,mod,advantage),`${qty}d${sides}${mod>=0?'+'+mod:mod}`);}
+function setQty(n){diceState.qty=n;document.querySelectorAll('[id^="qty-"]').forEach(e=>e.classList.remove('active'));document.getElementById('qty-'+n).classList.add('active');}
+function selectDie(s){
+  diceState.sides=s;document.querySelectorAll('.die-btn').forEach(b=>b.classList.remove('selected'));event.target.classList.add('selected');
+  const ab=document.getElementById('adv-btns');ab.style.display=s===20?'flex':'none';
+  if(s!==20){diceState.advantage=null;document.querySelectorAll('.adv-btn').forEach(b=>b.classList.remove('active'));}
+  const rb=document.getElementById('main-roll-btn');rb.disabled=false;
+  rb.textContent=`🎲 Roll ${diceState.qty}d${s}${diceState.mod!==0?(diceState.mod>0?'+'+diceState.mod:diceState.mod):''}`;
+}
+document.getElementById('mod-input').addEventListener('input',function(){diceState.mod=parseInt(this.value)||0;if(diceState.sides){const m=diceState.mod;document.getElementById('main-roll-btn').textContent='🎲 Roll '+diceState.qty+'d'+diceState.sides+(m>0?'+'+m:m!==0?m:'');}});
+function toggleAdvantage(t){if(diceState.advantage===t)diceState.advantage=null;else diceState.advantage=t;document.getElementById('adv-btn').classList.toggle('active',diceState.advantage==='adv');document.getElementById('dis-btn').classList.toggle('active',diceState.advantage==='dis');}
+function rollDiceQuick(label,formula,type){
+  const fEl=document.getElementById('dice-formula'),el=document.getElementById('dice-result'),bEl=document.getElementById('dice-breakdown');
+  el.className='dice-result rolling';fEl.textContent=label+': '+formula;
+  const result=rollExpr(formula);const sides=parseInt((formula.match(/d(\d+)/)||[,20])[1]);const nat=result.rolls.length===1?result.rolls[0]:null;
+  let f=8;const t=setInterval(()=>{
+    el.textContent=Math.floor(Math.random()*sides)+1;
+    if(--f<=0){clearInterval(t);el.className='dice-result settled';el.textContent=result.total;
+      bEl.textContent='['+result.rolls.join('+')+'] = '+result.total;
+      if(nat===20&&sides===20){el.classList.add('nat20');showToast('🌟 NAT 20!!! 🌟');}
+      else if(nat===1&&sides===20){el.classList.add('nat1');showToast('💀 Nat 1...');}
+      addHistory(label+': '+formula,result.total,null);}
+  },55);
+  openDice();switchDiceTab('quick');
+}
+function quickRollWeapon(atkL,atkF,dmgL,dmgF){
+  if(atkF){rollDiceQuick(atkL,atkF,'atk');}
+  else{rollDiceQuick(dmgL,dmgF,'dmg');}
+}
+function updateQuickRolls(){
+  const i=S.selectedChar;if(i===null)return;
+  const ch=CHARS[i];
+  const gl=document.getElementById('qr-char-label');if(gl)gl.textContent=CHAR_NAMES[i]+"'s Quick Rolls";
+  const grid=document.getElementById('quick-rolls-grid');if(!grid)return;
+  grid.innerHTML=ch.quickRolls.map(qr=>`<div class="qr-btn qr-type-${qr.t}" onclick="rollDiceQuick('${qr.l}','${qr.f}','${qr.t}')"><span class="qr-label">${qr.l}</span><span class="qr-formula">${qr.f}</span></div>`).join('');
+}
+function updateSavesChecks(){
+  const i=S.selectedChar;if(i===null)return;
+  const ch=CHARS[i];
+  const lbl=document.getElementById('sc-char-label');if(lbl)lbl.textContent=CHAR_NAMES[i]+"'s Saves & Checks";
+  const cont=document.getElementById('sc-content');if(!cont)return;
+  const savesHtml='<div class="sc-section-label">Saving Throws</div><div class="sc-rolls-grid">'+
+    ch.saves.map(s=>`<div class="sc-btn" onclick="rollDiceQuick('${s.n}','1d20${s.m}','save')"><div class="sc-prof-dot${s.prof?' prof':''}"></div><span class="sc-name">${s.n.replace('gation','').replace('elligence','t')}</span><span class="sc-val ${parseFloat(s.m)>0?'pos':parseFloat(s.m)<0?'neg':'zero'}">${s.m}</span></div>`).join('')+'</div>';
+  const chkHtml='<div class="sc-section-label">Ability Checks</div><div class="sc-rolls-grid">'+
+    ch.abilityChecks.map(a=>`<div class="sc-btn" onclick="rollDiceQuick('${a.n}','1d20${a.m}','check')"><span class="sc-name">${a.n}</span><span class="sc-val ${parseFloat(a.m)>0?'pos':parseFloat(a.m)<0?'neg':'zero'}">${a.m}</span></div>`).join('')+'</div>';
+  const skHtml='<div class="sc-section-label">Proficient Skills</div><div class="sc-rolls-grid">'+
+    ch.skills.map(sk=>`<div class="sc-btn" onclick="rollDiceQuick('${sk.n}','1d20${sk.m}','skill')"><div class="sc-prof-dot${sk.e?' prof':''}${sk.prof&&!sk.e?' prof':''}"></div><span class="sc-name">${sk.n.replace(' ★','')}</span><span class="sc-val ${parseFloat(sk.m)>0?'pos':'zero'}">${sk.m}</span></div>`).join('')+'</div>';
+  cont.innerHTML=savesHtml+chkHtml+skHtml;
+}
+
+// ═══════════════════════════════════════════════════
+// DICE OVERLAY
+// ═══════════════════════════════════════════════════
+function toggleDice(){const o=document.getElementById('dice-overlay'),f=document.getElementById('dice-fab');const open=o.classList.toggle('open');f.classList.toggle('open',open);if(open){updateQuickRolls();updateSavesChecks();}}
+function openDice(){document.getElementById('dice-overlay').classList.add('open');document.getElementById('dice-fab').classList.add('open');updateQuickRolls();updateSavesChecks();}
+function closeDice(){document.getElementById('dice-overlay').classList.remove('open');document.getElementById('dice-fab').classList.remove('open');}
+function overlayClick(e){if(e.target===document.getElementById('dice-overlay'))closeDice();}
+function switchDiceTab(tab){document.querySelectorAll('.dice-tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.dice-tab-content').forEach(c=>c.classList.remove('active'));document.getElementById('dtab-'+tab).classList.add('active');document.getElementById('dcontent-'+tab).classList.add('active');}
+
+// ═══════════════════════════════════════════════════
+// HISTORY & TOAST
+// ═══════════════════════════════════════════════════
+function addHistory(formula,result){S.history.unshift({formula,result});if(S.history.length>8)S.history.pop();renderHistory();save();}
+function renderHistory(){const el=document.getElementById('dice-history-list');if(!el)return;if(!S.history.length){el.innerHTML='<div style="font-family:var(--font-b);font-style:italic;font-size:.72rem;color:var(--parchment-dark);opacity:.35">No rolls yet</div>';return;}el.innerHTML=S.history.slice(0,6).map(h=>`<div class="history-entry"><span class="he-formula">${h.formula}</span><span class="he-result">${h.result}</span></div>`).join('');}
+let toastTimer;
+function showToast(msg){const el=document.getElementById('toast');el.innerHTML=`<div class="toast-msg">${msg}</div>`;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.innerHTML='',2200);}
+
+// ═══════════════════════════════════════════════════
+// FEATURE & SPELL CONTENT
+// ═══════════════════════════════════════════════════
+const FEATURES_0=`<div class="feature-list">
+<div class="feature-item"><div class="feature-name">Extra Attack</div><div class="feature-text">Attack <strong>twice</strong> on Attack action.</div></div>
+<div class="feature-item"><div class="feature-name">Fighting Style — Dueling</div><div class="feature-text">+2 damage with one-handed weapon when off-hand is free.</div></div>
+<div class="feature-item"><div class="feature-name">Action Surge <span class="feature-badge">1/Short Rest</span></div><div class="feature-text"><strong>Bonus action:</strong> Take one additional complete action.</div></div>
+<div class="feature-item"><div class="feature-name">Second Wind <span class="feature-badge">1/Short Rest</span></div><div class="feature-text"><strong>Bonus action:</strong> Regain <strong>1d10 + 5 HP</strong>.</div></div>
+</div>
+<div class="divider" style="margin:.55rem 0"></div>
+<div style="font-family:var(--font-d);font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-light);margin-bottom:.45rem">Battle Master Maneuvers · DC 13 · Superiority Dice: d8</div>
+<div class="maneuver-card"><div class="maneuver-name">Riposte</div><div class="maneuver-desc"><strong>Reaction:</strong> Enemy misses you in melee → attack back + add superiority die to damage.</div></div>
+<div class="maneuver-card"><div class="maneuver-name">Menacing Attack</div><div class="maneuver-desc">On hit: spend die, add to damage. Target: DC 13 WIS save or <strong>Frightened</strong>.</div></div>
+<div class="maneuver-card"><div class="maneuver-name">Sweeping Attack</div><div class="maneuver-desc">On hit: deal superiority die damage to a <strong>different</strong> creature within 5ft (no roll).</div></div>`;
+
+const FEATURES_1=`<div class="feature-list">
+<div class="feature-item"><div class="feature-name">Eldritch Blast + Agonizing Blast</div><div class="feature-text"><strong>2 beams</strong> at lvl 5. +CHA (+4) to each beam damage.</div></div>
+<div class="feature-item"><div class="feature-name">Devil's Sight</div><div class="feature-text">See normally in magical and nonmagical darkness to <strong>120ft</strong>.</div></div>
+<div class="feature-item"><div class="feature-name">Pact of the Blade</div><div class="feature-text">Conjure magical trident (or any melee weapon). Use CHA for attack/damage. Reappears as <strong>bonus action</strong>.</div></div>
+<div class="feature-item"><div class="feature-name">Hellish Resistance</div><div class="feature-text">Resistance to <strong>fire damage</strong>.</div></div>
+<div class="feature-item"><div class="feature-name">Otherworldly Leap <span class="feature-badge">Invocation</span></div><div class="feature-text">Cast <strong>Jump</strong> on self at will, no slot.</div></div>
+</div>`;
+
+const FEATURES_2=`<div class="feature-list">
+<div class="feature-item"><div class="feature-name">Sneak Attack — +3d6</div><div class="feature-text"><strong>Once/turn</strong> with advantage OR ally within 5ft of target (no disadvantage).</div></div>
+<div class="feature-item"><div class="feature-name">Cunning Action</div><div class="feature-text"><strong>Bonus action:</strong> Dash, Disengage, or Hide.</div></div>
+<div class="feature-item"><div class="feature-name">Uncanny Dodge</div><div class="feature-text"><strong>Reaction:</strong> Halve damage from a visible attack.</div></div>
+<div class="feature-item"><div class="feature-name">Evasion</div><div class="feature-text">DEX save for half: <strong>success = 0 damage, fail = half</strong>.</div></div>
+<div class="feature-item"><div class="feature-name">Fast Hands <span class="feature-badge">Thief</span></div><div class="feature-text">Sleight of Hand, Thieves' Tools, or Use Object as <strong>bonus action</strong>.</div></div>
+<div class="feature-item"><div class="feature-name">Supreme Sneak <span class="feature-badge">Thief</span></div><div class="feature-text"><strong>Advantage on Stealth</strong> when moving at half speed.</div></div>
+<div class="feature-item"><div class="feature-name">Halfling Lucky</div><div class="feature-text">Roll a 1 on d20 → <strong>reroll it</strong>.</div></div>
+</div>`;
+
+const FEATURES_3=`<div class="feature-list">
+<div class="feature-item"><div class="feature-name">Extra Attack <span class="feature-badge">Valor</span></div><div class="feature-text">Attack <strong>twice</strong> on Attack action.</div></div>
+<div class="feature-item"><div class="feature-name">Combat Inspiration <span class="feature-badge">Valor</span></div><div class="feature-text">Bardic Inspiration die can add to <strong>AC</strong> (reaction) or <strong>weapon damage</strong>.</div></div>
+<div class="feature-item"><div class="feature-name">Font of Inspiration</div><div class="feature-text">Regain all Bardic Inspiration on <strong>short rest</strong>.</div></div>
+<div class="feature-item"><div class="feature-name">Jack of All Trades</div><div class="feature-text">Add <strong>+1</strong> to any unproficient ability check.</div></div>
+<div class="feature-item"><div class="feature-name">Song of Rest</div><div class="feature-text">Allies' Hit Dice on short rest regain <strong>+1d6 extra HP</strong>.</div></div>
+</div>`;
+
+const FEATURES_4=`<div class="feature-list">
+<div class="feature-item"><div class="feature-name">Extra Attack</div><div class="feature-text">Attack <strong>twice</strong> on Attack action.</div></div>
+<div class="feature-item"><div class="feature-name">Martial Arts (d6)</div><div class="feature-text">Use DEX for monk weapons/unarmed. <strong>Bonus unarmed strike</strong> after Attack action. Min die: 1d6.</div></div>
+<div class="feature-item"><div class="feature-name">Unarmored Defense</div><div class="feature-text">AC = 10 + DEX (+3) + WIS (+3) = <strong>16</strong> while unarmored.</div></div>
+<div class="feature-item"><div class="feature-name">Drunken Technique <span class="feature-badge">Drunken Master</span></div><div class="feature-text">Flurry of Blows grants <strong>Disengage + 10ft extra movement</strong>.</div></div>
+<div class="feature-item"><div class="feature-name">Stunning Strike <span class="feature-badge">1 Ki</span></div><div class="feature-text">After a hit → target <strong>DC 14 CON save</strong> or Stunned until end of your next turn.</div></div>
+<div class="feature-item"><div class="feature-name">Ki Powers <span class="feature-badge">5/Short Rest</span></div><div class="feature-text"><strong>Flurry of Blows (1 Ki):</strong> 2 bonus unarmed strikes + Disengage + 10ft.<br><strong>Patient Defense (1 Ki):</strong> Dodge as bonus action.<br><strong>Step of the Wind (1 Ki):</strong> Dash or Disengage as bonus action.</div></div>
+<div class="feature-item"><div class="feature-name">Deflect Missiles</div><div class="feature-text"><strong>Reaction:</strong> Reduce ranged weapon dmg by 1d10+8. If reduced to 0: catch and throw (+6 hit, 1d6+3, range 20/60ft, costs 1 Ki).</div></div>
+<div class="feature-item"><div class="feature-name">Slow Fall</div><div class="feature-text"><strong>Reaction:</strong> Reduce fall damage by <strong>25</strong>.</div></div>
+<div class="feature-item"><div class="feature-name">Dwarven Resilience</div><div class="feature-text">Advantage vs Poison. Resistance to Poison damage.</div></div>
+<div class="feature-item"><div class="feature-name">Line Cast <span class="feature-badge">Homebrew</span></div><div class="feature-text"><strong>Bonus action:</strong> Grapple attempt at 10ft range with Vesna. Target: <strong>DC 14 DEX save</strong> or Restrained until STR check (DC 14) or Bogdan releases.</div></div>
+<div class="feature-item"><div class="feature-name">Dutch Courage <span class="feature-badge">Homebrew</span></div><div class="feature-text">See Dutch Courage tracker. Sober = DisAdv attacks. Tipsy = optimal. Drunk = +1d4 melee dmg. Wasted = Reckless Attack.</div></div>
+</div>`;
+
+const SPELLS_1=`
+<div class="spell-card cantrip"><div class="spell-header"><div class="spell-name">Eldritch Blast</div><div class="spell-ltag cantrip">Cantrip</div></div><div class="spell-meta"><span class="spell-tag">Action</span><span class="spell-tag">120ft</span><span class="spell-tag">2 beams</span></div><div class="spell-desc"><strong>+6 hit</strong> · 1d10+4 force per beam</div></div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Hex</div><div class="spell-ltag wk">1st · WK</div></div><div class="spell-meta"><span class="spell-tag">Bonus Action</span><span class="spell-tag">Concentration 1hr</span></div><div class="spell-desc">Curse target → <strong>+1d6 necrotic</strong> on your attacks. DisAdv on chosen ability checks.</div></div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Armor of Agathys</div><div class="spell-ltag wk">1st · WK</div></div><div class="spell-meta"><span class="spell-tag">Action</span><span class="spell-tag">Self</span></div><div class="spell-desc">Gain <strong>15 temp HP</strong>. Attackers take <strong>15 cold</strong> while temp HP lasts.</div></div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Misty Step</div><div class="spell-ltag wk">2nd · WK</div></div><div class="spell-meta"><span class="spell-tag">Bonus Action</span><span class="spell-tag">30ft</span></div><div class="spell-desc">Teleport to visible unoccupied space within <strong>30ft</strong>.</div></div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Hunger of Hadar</div><div class="spell-ltag wk">3rd · WK</div></div><div class="spell-meta"><span class="spell-tag">Action</span><span class="spell-tag">Concentration 1min</span><span class="spell-tag">150ft</span></div><div class="spell-desc">20ft radius void sphere. Blinded, difficult terrain, <strong>2d6 cold</strong> entry + <strong>2d6 acid</strong> end-of-turn.</div></div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Counterspell</div><div class="spell-ltag wk">3rd · WK</div></div><div class="spell-meta"><span class="spell-tag">Reaction</span><span class="spell-tag">60ft</span></div><div class="spell-desc">Auto-interrupt spell lvl 3 or lower. Higher: <strong>DC 10 + spell lvl</strong> Arcana check.</div></div>`;
+
+const SPELLS_3=`
+<div class="spell-card cantrip"><div class="spell-header"><div class="spell-name">Vicious Mockery</div><div class="spell-ltag cantrip">Cantrip</div></div><div class="spell-meta"><span class="spell-tag">Action</span><span class="spell-tag">60ft</span><span class="spell-tag">DC 14 WIS</span></div><div class="spell-desc">1d4 psychic. Fail → <strong>DisAdv next attack</strong>.</div></div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Healing Word</div><div class="spell-ltag">1st</div></div><div class="spell-meta"><span class="spell-tag">Bonus Action</span><span class="spell-tag">60ft</span></div><div class="spell-desc">Heal <strong>1d4 + 4 HP</strong>.</div></div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Thunderwave</div><div class="spell-ltag">1st</div></div><div class="spell-meta"><span class="spell-tag">Action</span><span class="spell-tag">15ft cube</span><span class="spell-tag">DC 14 CON</span></div><div class="spell-desc">Fail: <strong>2d8 thunder + pushed 10ft</strong>. Half on success.</div></div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Suggestion</div><div class="spell-ltag">2nd</div></div><div class="spell-meta"><span class="spell-tag">Action</span><span class="spell-tag">Concentration 8hrs</span><span class="spell-tag">DC 14 WIS</span></div><div class="spell-desc">Target follows a <strong>reasonable suggestion</strong> for up to 8 hours.</div></div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Shatter</div><div class="spell-ltag">2nd</div></div><div class="spell-meta"><span class="spell-tag">Action</span><span class="spell-tag">10ft sphere 60ft</span><span class="spell-tag">DC 14 CON</span></div><div class="spell-desc">Fail: <strong>3d8 thunder</strong>. Objects take full damage.</div></div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Fear</div><div class="spell-ltag">3rd</div></div><div class="spell-meta"><span class="spell-tag">Action</span><span class="spell-tag">Concentration</span><span class="spell-tag">30ft cone</span><span class="spell-tag">DC 14 WIS</span></div><div class="spell-desc">Fail: <strong>Frightened</strong> + must flee each turn.</div></div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Hypnotic Pattern</div><div class="spell-ltag">3rd</div></div><div class="spell-meta"><span class="spell-tag">Action</span><span class="spell-tag">Concentration</span><span class="spell-tag">30ft cube 120ft</span><span class="spell-tag">DC 14 WIS</span></div><div class="spell-desc">Fail: <strong>Incapacitated, speed 0</strong> until damage or spell ends.</div></div>`;
+
+const FEATURES_5=`<div class="feature-list">
+<div class="feature-item"><div class="feature-name">Extra Attack</div><div class="feature-text">Attack <strong>twice</strong> on Attack action.</div></div>
+<div class="feature-item"><div class="feature-name">Divine Smite</div><div class="feature-text">On a melee hit: expend a spell slot → <strong>+2d8 necrotic (1st slot) / +3d8 (2nd slot)</strong>. Crits double the dice.</div></div>
+<div class="feature-item"><div class="feature-name">Lay on Hands — 25 HP pool</div><div class="feature-text"><strong>Action:</strong> Restore any amount of HP from pool. Or spend 5 HP to cure one disease or poison. <em>Track remaining in notes.</em></div></div>
+<div class="feature-item"><div class="feature-name">Fighting Style — Dueling</div><div class="feature-text">+2 damage with a one-handed melee weapon when no other melee weapon in hand. Shield is fine.</div></div>
+<div class="feature-item"><div class="feature-name">Divine Sense</div><div class="feature-text"><strong>Action:</strong> Detect celestials, fiends, and undead within 60ft until end of next turn. <strong>4 uses/long rest.</strong></div></div>
+<div class="feature-item"><div class="feature-name">Divine Health</div><div class="feature-text">Immune to disease. This is one of the few advantages of his situation.</div></div>
+</div>
+<div class="divider" style="margin:.55rem 0"></div>
+<div style="font-family:var(--font-d);font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-light);margin-bottom:.45rem">Channel Divinity · 1/Short Rest</div>
+<div class="maneuver-card"><div class="maneuver-name">Vow of Enmity</div><div class="maneuver-desc"><strong>Bonus action:</strong> Choose a creature within 10ft → <strong>advantage on all attack rolls</strong> against it for 1 minute. Use this constantly.</div></div>
+<div class="maneuver-card"><div class="maneuver-name">Abjure Enemy</div><div class="maneuver-desc"><strong>Action (60ft):</strong> Target DC 14 WIS save or <strong>Frightened + speed 0</strong> for 1 minute. Fiends and undead have DisAdv on the save.</div></div>`;
+
+const SPELLS_5=`
+<div style="font-family:var(--font-d);font-size:.6rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text-light);margin-bottom:.4rem">Oath Spells — always prepared</div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Bane</div><div class="spell-ltag">1st · Oath</div></div><div class="spell-meta"><span class="spell-tag">Action</span><span class="spell-tag">Concentration 1min</span><span class="spell-tag">30ft · 3 targets</span><span class="spell-tag">DC 14 CHA</span></div><div class="spell-desc">Fail → <strong>−1d4 on attack rolls and saving throws</strong>.</div></div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Hunter's Mark</div><div class="spell-ltag">1st · Oath</div></div><div class="spell-meta"><span class="spell-tag">Bonus Action</span><span class="spell-tag">Concentration 1hr</span></div><div class="spell-desc">Mark a target → <strong>+1d6 damage</strong> when you hit it. Move mark as bonus action when target drops.</div></div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Hold Person</div><div class="spell-ltag">2nd · Oath</div></div><div class="spell-meta"><span class="spell-tag">Action</span><span class="spell-tag">Concentration 1min</span><span class="spell-tag">60ft</span><span class="spell-tag">DC 14 WIS</span></div><div class="spell-desc">Paralyze a humanoid. Attacks against it have <strong>advantage</strong>. Hits from 5ft = <strong>automatic crit</strong>.</div></div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Misty Step</div><div class="spell-ltag">2nd · Oath</div></div><div class="spell-meta"><span class="spell-tag">Bonus Action</span><span class="spell-tag">30ft</span></div><div class="spell-desc">Teleport to visible unoccupied space. In plate armour. The crew finds this unreasonably elegant.</div></div>
+<div class="divider" style="margin:.5rem 0"></div>
+<div style="font-family:var(--font-d);font-size:.6rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text-light);margin-bottom:.4rem">Prepared Spells</div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Command</div><div class="spell-ltag">1st</div></div><div class="spell-meta"><span class="spell-tag">Action</span><span class="spell-tag">60ft</span><span class="spell-tag">DC 14 WIS</span></div><div class="spell-desc">One word: <strong>FLEE · GROVEL · HALT · DROP · APPROACH</strong>. Target obeys on its next turn.</div></div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Wrathful Smite</div><div class="spell-ltag">1st</div></div><div class="spell-meta"><span class="spell-tag">Bonus Action</span><span class="spell-tag">Concentration 1min</span></div><div class="spell-desc">Next hit: <strong>+1d6 psychic</strong>. Target DC 14 WIS save or <strong>Frightened</strong> until it succeeds on a save.</div></div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Compelled Duel</div><div class="spell-ltag">1st</div></div><div class="spell-meta"><span class="spell-tag">Bonus Action</span><span class="spell-tag">Concentration 1min</span><span class="spell-tag">30ft</span><span class="spell-tag">DC 14 WIS</span></div><div class="spell-desc">Force single combat. Target has DisAdv attacking others; must move toward you each turn.</div></div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Thunderous Smite</div><div class="spell-ltag">1st</div></div><div class="spell-meta"><span class="spell-tag">Bonus Action</span><span class="spell-tag">Concentration 1min</span></div><div class="spell-desc">Next hit: <strong>+2d6 thunder</strong>. Target DC 14 STR save or <strong>pushed 10ft + knocked prone</strong>.</div></div>
+<div class="spell-card"><div class="spell-header"><div class="spell-name">Shield of Faith</div><div class="spell-ltag">1st</div></div><div class="spell-meta"><span class="spell-tag">Bonus Action</span><span class="spell-tag">Concentration 10min</span><span class="spell-tag">60ft</span></div><div class="spell-desc"><strong>+2 AC</strong> to one creature for up to 10 minutes. Stacks with everything.</div></div>`;
+
+const EQ_5=`<ul class="equipment-list"><li>Plate armour (AC 18) · Shield (AC +2) · <strong>Total: AC 20</strong></li>
+<li>Longsword · Javelin ×5 · Explorer's pack</li>
+<li class="special">🏴 Torn banner of his former order — he won't explain it</li>
+<li>Naval signet ring worn inside-out · A formal letter of resignation nobody accepted</li></ul>
+<div class="divider" style="margin:.55rem 0"></div>
+<div class="traits-grid">
+<div class="trait-box"><div class="trait-label">Personality</div><div class="trait-text">Full plate armour on a pirate ship. Objects formally to every plan. Does the plan anyway. Has started humming Zvonko's šanty involuntarily and is deeply upset about this.</div></div>
+<div class="trait-box"><div class="trait-label">Connection to Campaign</div><div class="trait-text">His former order was complicit in keeping the Gilded Kraken's curse profitable — ships that paid were waved through. He knows something. He has not yet decided to share it.</div></div>
+</div>`;
+
+const EQ_0=`<ul class="equipment-list"><li>Chain mail (AC 16)</li><li>Rapier · Dagger ×2 · Flintlock pistol + powder horn &amp; shot · Explorer's pack</li><li>Flask of rum (non-magical, but important)</li><li class="special">🎩 The Magnificent Hat — Marin insists: "+2 to everything"</li></ul>`;
+const EQ_1=`<ul class="equipment-list"><li>Leather armor (AC 13)</li><li>Conjured trident (appears/disappears at will)</li><li>Arcane focus — vial of seawater from <em>somewhere deep</em></li><li>Hermit's pack · Journal of whispered advice</li><li class="special">🐚 Coral-tipped horns (not equipment, just aesthetics)</li></ul>`;
+const EQ_2=`<ul class="equipment-list"><li>Studded leather (AC 15) · 2× Shortsword</li><li>Daggers ×4: Marta · Gregor · The Quiet One · Señora Punta</li><li>Flintlock pistol + powder horn &amp; shot · Thieves' tools · Cook's kit · Burglar's pack</li><li class="special">🔪 Big Carl &amp; Steve — extra knives. Big Carl has opinions.</li></ul>`;
+const EQ_3=`<ul class="equipment-list"><li>Studded leather (AC 15) · Rapier · Flintlock pistol + powder horn &amp; shot</li><li class="special">🎵 Instrument of choice (player picks)</li><li>Entertainer's pack · Navigator's charts · Quill &amp; ink (for šanty)</li></ul>`;
+const EQ_4=`<ul class="equipment-list"><li>Fisherman's clothes · No armor (Unarmored Defense: AC 16)</li><li class="special">🎣 "Vesna" — Fishing pole / Quarterstaff. She has feelings.</li><li>3× Flask of rum (required for combat effectiveness) · Fishing hooks &amp; line</li><li>Explorer's pack · Dwarven ale (backup)</li><li class="special">🍺 Dutch Courage: 1 drink to reach peak performance</li></ul>`;
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
